@@ -1,5 +1,5 @@
 function [lambda, Q] = dlaed3(delta, z, rho)
-% stably compute the eigendecomposition Q * diag(lambda) * Q**T  of
+% stably computes the eigendecomposition Q * diag(lambda) * Q**T  of
 % diag(delta) + (1/rho) * z * z**T  by solving an inverse eigenvalue problem.
 n = length(delta);
 tau = zeros(n, 1);

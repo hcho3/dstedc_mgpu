@@ -1,3 +1,4 @@
+init_example
 f = @(tau, orig) rho + sum(zeta.^2./(delta-orig-tau));
 for k=1:n
     fprintf(1, 'k = %d\n', k);
