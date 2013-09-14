@@ -6,18 +6,19 @@ function [D, Q, perm1] = dlaed1(D, Q, perm1, rho, cutpnt)
 %     where z = Q'(in) * u, u is a vector of length N with ones in the cutpnt
 %     and cutpnt + 1 th elements and zeros elsewhere. 
 N = length(D);
+old_D = D;
+old_Q = Q;
 
 % form the z vector
-z = [Q(cutpnt, 1:cutpnt)'; Q(cutpnt+1, cutpnt+1:end)']
+z = [Q(cutpnt, 1:cutpnt)'; Q(cutpnt+1, cutpnt+1:end)'];
 
 % deflate eigenvalues
 perm1(cutpnt+1:end) = perm1(cutpnt+1:end) + cutpnt;
-[K, D, Q, rho, w] = dlaed2(D, Q, cutpnt, perm1, rho, z)
+[K, D, Q, rho, w] = dlaed2(D, Q, cutpnt, perm1, rho, z);
 
 % solve secular equation
 if K > 0
-    [D(1:K), Qhat] = dlaed3(D(1:K), w, 1/rho);
-    Qhat
+    [D(1:K), Qhat] = dlaed3(D(1:K), w, rho);
     % back-transformation
     Q = [Q(:, 1:K) * Qhat, Q(:, K+1:end)];
 
