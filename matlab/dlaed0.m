@@ -46,10 +46,11 @@ for i=0:subpbs-1
         matsiz = partition(i+1) - partition(i);
     end
     rlim = partition(i+1);
-    [Q(submat:rlim, submat:rlim), Dtemp] = ...
+    [Qtemp, Dtemp] = ...
         eig( diag(D(submat:rlim)) + diag(E(submat:rlim-1), 1) + ...
              diag(E(submat:rlim-1), -1) );
-    D(submat:rlim) = diag(Dtemp);
+    [D(submat:rlim), I] = sort(diag(Dtemp));
+    Q(submat:rlim, submat:rlim) = Qtemp(:, I);
     k = 1;
     for j=submat:partition(i+1)
         perm1(j) = k;

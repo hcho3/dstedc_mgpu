@@ -9,13 +9,13 @@ N = length(D);
 old_D = D;
 old_Q = Q;
 
+
 % form the z vector
 z = [Q(cutpnt, 1:cutpnt)'; Q(cutpnt+1, cutpnt+1:end)'];
 
 % deflate eigenvalues
 perm1(cutpnt+1:end) = perm1(cutpnt+1:end) + cutpnt;
 [K, D, Q, rho, w] = dlaed2(D, Q, cutpnt, perm1, rho, z);
-
 % solve secular equation
 if K > 0
     [D(1:K), Qhat] = dlaed3(D(1:K), w, rho);

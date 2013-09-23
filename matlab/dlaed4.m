@@ -11,7 +11,7 @@ f = @(tau, orig) rho + sum(z.^2./(delta-orig-tau));
 
 % iterations begin
 it = 1;
-while it < 1000 
+while it < 100
     eta = middle_way(i, delta, z, rho, tau, orig);
     tau = tau + eta;
     %fprintf(1, 'f(%.12g + %.12g) = %.12g\n', orig, tau, f(tau, orig));

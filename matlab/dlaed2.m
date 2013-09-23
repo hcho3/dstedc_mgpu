@@ -46,6 +46,8 @@ K2 = N + 1;
 for j=1:N
     nj = perm2(j);
     if rho * abs(z(nj)) <= tol  % deflate due to small z component.
+        fprintf(1, strcat('An eigenvalue in the beginning of the spectrum',...
+        ' were deflated due to a small z component.\n'));
         K2 = K2 - 1;
         perm4(K2) = j;
     else
@@ -57,8 +59,10 @@ j = j + 1;
 while j <= N
     nj = perm2(j);
     if rho * abs(z(nj)) <= tol  % deflate due to small z component.
+        fprintf(1, strcat('An eigenvalue in the middle of the spectrum',...
+        ' were deflated due to a small z component.\n'));
         K2 = K2 - 1;
-        perm4(K2) = j;
+        perm4(K2) = j - 1;
     else
         % check if eigenvalues are close enough to allow deflation.
         s = z(pj);
@@ -69,6 +73,9 @@ while j <= N
         c = c / tau;
         s = -s / tau;
         if abs(t * c * s) <= tol  % deflation is possible.
+            fprintf(1, strcat('An eigenvalue in the middle of the', ...
+            ' spectrum were deflated because it is nearly identical to', ...
+            ' the preceding one.\n'));
             z(nj) = tau;
             z(pj) = 0;
             pc = Q(:, pj);
@@ -82,7 +89,7 @@ while j <= N
             i = 1;
             while K2 + i <= N 
                 % find the right place for newly deflated eigenvalue.
-                if D(pj) < D(perm2(perm4(K2+i)))
+                if D(pj) < D(perm4(K2+i))
                     perm4(K2+i-1) = perm4(K2+i);
                     perm4(K2+i) = j - 1;
                     i = i + 1;

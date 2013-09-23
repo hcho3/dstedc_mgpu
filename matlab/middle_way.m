@@ -22,6 +22,7 @@ if k >= 1 && k < n
         eta = -f_y / fderiv_y;
     end
 else
+    delta_n_1 = delta(n) + zeta' * zeta / rho; % delta(n+1)
     DELTA_n_1 = delta(n-1) - orig - tau;
     DELTA_n = delta(n) - orig - tau;
     f_y = rho + sum(zeta.^2 ./ (delta - orig - tau));
@@ -37,7 +38,7 @@ else
         eta = (2 * b) / (a - sqrt(a^2 - 4 * b * c));
     end
     % if eta + y falls below delta(n), simply do a Newton step.
-    if orig + tau + eta <= delta(n)
+    if orig + tau + eta <= delta(n) || orig + tau + eta >= delta_n_1
         eta = -f_y / fderiv_y;
     end
 end
