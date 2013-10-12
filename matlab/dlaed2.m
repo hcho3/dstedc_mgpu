@@ -16,107 +16,79 @@ rho = abs(2 * rho);  % rho = abs(norm(z)^2 * rho)
 % apply perm1 to re-merge deflated eigenvalues.
 z = z(perm1);
 D = D(perm1);
+Q = Q(:, perm1);
 
-% compute perm2 that would merge two lists of eigenvalues so that D(perm2)
-% would be in ascending order.
+% compute perm2 that merge-sorts D1, D2 into one sorted list.
 perm2 = dlamrg(N1, N2, D, 1, 1);
-perm3 = perm1(perm2);
+% apply perm2.
+z = z(perm2);
+D = D(perm2);
+Q = Q(:, perm2);
 
-% ---deflate---
-
-% compute the allowable deflation tolerance
+% compute allowable deflation tolerance.
 [~, imax] = max(abs(z));
 [~, jmax] = max(abs(D));
-tol = 8 * eps * max( abs(D(jmax)), abs(z(imax)) ); 
+tol = 8.0 * eps * max( [abs(D(jmax)), abs(z(imax))] );
 
-% if rho is small enough, then we're done; we just need to put the eigenvalues
-% and eigenvectors in ascending order.
+% If the rank-1 modifier is small enough, we're done: all eigenvalues deflate.
 if rho * abs(z(imax)) <= tol
-    K = 0; % all eigenvalues deflated
-    D = D(perm2);
-    Q = Q(:, perm3);
+    K = 0;
     w = zeros(0, 1);
     return;
 end
 
-perm4 = zeros(1, N);
-
+% --deflation--
+perm3 = zeros(N, 1);
 K = 0;
-K2 = N + 1;
-for j=1:N
-    nj = perm2(j);
-    if rho * abs(z(nj)) <= tol  % deflate due to small z component.
-        fprintf(1, strcat('An eigenvalue in the beginning of the spectrum',...
-        ' were deflated due to a small z component.\n'));
+K2 = N;
+for i=1:N
+    if rho * abs(z(i)) <= tol
+        % 1) z-component is small
+        % => move D(i) to the end of list.
+        perm3(K2) = i;
         K2 = K2 - 1;
-        perm4(K2) = j;
-    else
-        pj = nj;
-        break;
-    end
-end
-j = j + 1;
-while j <= N
-    nj = perm2(j);
-    if rho * abs(z(nj)) <= tol  % deflate due to small z component.
-        fprintf(1, strcat('An eigenvalue in the middle of the spectrum',...
-        ' were deflated due to a small z component.\n'));
-        K2 = K2 - 1;
-        perm4(K2) = j - 1;
-    else
-        % check if eigenvalues are close enough to allow deflation.
-        s = z(pj);
-        c = z(nj);
-        % find sqrt(a^2 + b^2) without overflow or destructive underflow.
-        tau = dlapy2(c, s);
-        t = D(nj) - D(pj);
-        c = c / tau;
-        s = -s / tau;
-        if abs(t * c * s) <= tol  % deflation is possible.
-            fprintf(1, strcat('An eigenvalue in the middle of the', ...
-            ' spectrum were deflated because it is nearly identical to', ...
-            ' the preceding one.\n'));
-            z(nj) = tau;
-            z(pj) = 0;
-            pc = Q(:, pj);
-            nc = Q(:, nj);
-            Q(:, pj) =  c * pc + s * nc;
-            Q(:, nj) = -s * pc + c * nc;
-            t = D(pj) * c^2 + D(nj) * s^2;
-            D(nj) = D(pj) * s^2 + D(nj) * c^2;
-            D(pj) = t;
-            K2 = K2 - 1;
-            i = 1;
-            while K2 + i <= N 
-                % find the right place for newly deflated eigenvalue.
-                if D(pj) < D(perm4(K2+i))
-                    perm4(K2+i-1) = perm4(K2+i);
-                    perm4(K2+i) = j - 1;
-                    i = i + 1;
-                else
-                    break;
-                end
+    elseif i < N
+        t = abs(D(i+1) - D(i));
+        tau = dlapy2(z(i), z(i+1));
+        s = -z(i) / tau;
+        c = z(i+1) / tau;
+        if abs(t * c * s) <= tol
+            % 2) D(i) and D(i+1) are close to each other compared to the
+            %    z-weights given to them.
+            % => zero out z(i) by applying a Givens rotation. After this step
+            %    D(i) can be deflated away.
+            z(i+1) = tau;
+            z(i) = 0.0;
+            pq = Q(:, i);
+            nq = Q(:, i+1);
+            Q(:, i)   =  c * pq + s * nq;
+            Q(:, i+1) = -s * pq + c * nq;
+            t      = c^2 * D(i) + s^2 * D(i+1);
+            D(i+1) = s^2 * D(i) + c^2 * D(i+1);
+            D(i)   = t;
+            perm3(K2) = i;
+            k = 0;
+            while K2+k+1 <= N && D(perm3(K2+k)) < D(perm3(K2+k+1)) 
+                t = perm3(K2+k);
+                perm3(K2+k) = perm3(K2+k+1);
+                perm3(K2+k+1) = t;
+                k = k + 1;
             end
-            perm4(K2+i-1) = j - 1;
-            pj = nj;
-        else  % found a non-deflated eigenvalue
+            K2 = K2 - 1;
+        else
+            % 3) D(i) is not deflated.
             K = K + 1;
-            w(K) = z(pj);
-            perm4(K) = j - 1;
-            pj = nj;
+            perm3(K) = i;
         end
+    else
+        % 3) D(i) is not deflated.
+        K = K + 1;
+        perm3(K) = i;
     end
-    j = j + 1;
 end
-% record the last eigenvalue.
-K = K + 1;
-w(K) = z(pj);
-perm4(K) = j - 1;
 
-perm5 = perm2(perm4);
-perm6 = perm1(perm5);
-
-% sort eigenvalues and eigenvectors
-D = D(perm5);
-Q = Q(:, perm6);
-w = w(1:K);
+% Apply perm3 to eigenpairs.
+D = D(perm3);
+Q = Q(:, perm3);
+z = z(perm3);
+w = z(1:K);

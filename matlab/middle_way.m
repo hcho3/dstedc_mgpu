@@ -18,7 +18,7 @@ if k >= 1 && k < n
         eta = (2 * b) / (a + sqrt(a^2 - 4 * b * c));
     end
     % if eta + y falls below delta(k) or exceeds delta(k+1), do a Newton step.
-    if orig + tau + eta <= delta(k) || orig + tau + eta >= delta(k+1)
+    if DELTA_k - eta >= 0 || DELTA_k_1 - eta <= 0
         eta = -f_y / fderiv_y;
     end
 else
@@ -38,7 +38,7 @@ else
         eta = (2 * b) / (a - sqrt(a^2 - 4 * b * c));
     end
     % if eta + y falls below delta(n), simply do a Newton step.
-    if orig + tau + eta <= delta(n) || orig + tau + eta >= delta_n_1
+    if DELTA_n - eta >= 0 || (delta_n_1 - orig - tau) - eta <= 0
         eta = -f_y / fderiv_y;
     end
 end

@@ -14,7 +14,6 @@ it = 1;
 while it < 100
     eta = middle_way(i, delta, z, rho, tau, orig);
     tau = tau + eta;
-    %fprintf(1, 'f(%.12g + %.12g) = %.12g\n', orig, tau, f(tau, orig));
     if i < n && abs(eta) <= 16 * eps * min(abs(delta(i)-orig-tau),...
         abs(delta(i+1)-orig-tau))
         break
