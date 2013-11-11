@@ -6,8 +6,6 @@ function [D, Q, perm1] = dlaed1(D, Q, perm1, rho, cutpnt)
 %     where z = Q'(in) * u, u is a vector of length N with ones in the cutpnt
 %     and cutpnt + 1 th elements and zeros elsewhere. 
 N = length(D);
-old_D = D;
-old_Q = Q;
 
 
 % form the z vector

@@ -1,5 +1,7 @@
 dstedx_test
 *.o
-tester.c
+tester
 dstevd_c
 dstedc_c
+*.mat
+*.log

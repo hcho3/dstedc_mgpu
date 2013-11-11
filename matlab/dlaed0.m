@@ -36,7 +36,6 @@ end
 
 % Solve each submatrix eigenvalue problem at the bottom of the divide and
 % conquer tree.
-curr = 0;
 for i=0:subpbs-1
     if i == 0
         submat = 1;
@@ -77,9 +76,6 @@ while subpbs > 1
         % Merge lower order eigensystems (of size msd2 and matsiz - msd2) into
         % an eigensystem of size matsiz.
         rlim = partition(i+2);
-        old_d = D(submat:rlim);
-        old_q = Q(submat:rlim, submat:rlim);
-        old_perm1 = perm1(submat:rlim);
         [D(submat:rlim), Q(submat:rlim, submat:rlim), perm1(submat:rlim)] = ...
             dlaed1(D(submat:rlim), Q(submat:rlim, submat:rlim), ...
             perm1(submat:rlim), E(submat+msd2-1), msd2);
