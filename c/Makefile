@@ -1,12 +1,14 @@
 all: tester
 
 MATIO=$(HOME)/lib/libmatio.a
-LAPACK=/usr/local/plasma2.5.0/lib/liblapacke.a
+LAPACKE=/usr/local/plasma2.5.0/lib/liblapacke.a
+ATLAS_PATH=/usr/local/atlas3.10.1/lib/
 DEBUG=-O3
 
 tester: dstedc.o dlaed0.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o \
 		initial_guess.o middle_way.o dlamrg.o dlapy2.o matio.o tester.o
-	gcc -Wall $^ $(MATIO) $(LAPACK) -lm -lz -llapack -lblas $(DEBUG) -o $@
+	gcc -Wall -o $@ $^ $(MATIO) --static $(LAPACKE) -L$(ATLAS_PATH) \
+		-llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm -lpthread -I.
 
 dstedc.o: dstedc.c
 	gcc -Wall $(DEBUG) -c $< -o $@
