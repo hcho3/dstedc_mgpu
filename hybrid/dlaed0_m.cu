@@ -1,21 +1,23 @@
+#include <stdio.h>
 #include <cblas.h>
 #include <lapacke.h>
 #include <math.h>
+#include <omp.h>
 #include "dstedc.h"
 
 #define SMLSIZ 25
 
-void dlaed0(int N, double *D, double *E, double *Q, int LDQ,
-    double *WORK, double *WORK_dev, int *IWORK)
+void dlaed0_m(int NGPU, int N, double *D, double *E, double *Q, int LDQ,
+    double **WORK, double **WORK_dev, int **IWORK)
 /* computes all eigenvalues and corresponding eigenvectors of a symmetric
    tridiagonal matrix using the divide-and-conquer eigenvalue algorithm.
    We will have
       diag(D(in)) + diag(E, 1) + diag(E, -1) = Q * diag(D(out)) + Q'. */
 {
     int subpbs; // number of submatrices
-    int i, j, k, submat, smm1, msd2, curprb, matsiz;
-    int *partition = &IWORK[0];
-    int *perm1 = &IWORK[4*N + 3];
+    int i, j, k, submat, smm1, msd2, matsiz;
+    int *partition = &IWORK[0][0];
+    int *perm1 = &IWORK[0][4*N + 3];
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
@@ -52,7 +54,7 @@ void dlaed0(int N, double *D, double *E, double *Q, int LDQ,
             matsiz = partition[i+1] - partition[i];
         }
         LAPACKE_dsteqr_work(LAPACK_COL_MAJOR, 'I', matsiz, &D[submat],
-            &E[submat], &Q[submat + submat * LDQ], LDQ, WORK);
+            &E[submat], &Q[submat + submat * LDQ], LDQ, WORK[0]);
         k = 0;
         for (j = submat; j < partition[i+1]; j++)
             perm1[j] = k++;
@@ -61,25 +63,31 @@ void dlaed0(int N, double *D, double *E, double *Q, int LDQ,
     // Successively merge eigensystems of adjacent submatrices into
     // eigensystem for the corresponding larger matrix.
     while (subpbs > 1) {
-        for (i = -1; i < subpbs - 2; i += 2) {
+        omp_set_num_threads(NGPU);
+        #pragma omp parallel for default(none) \
+            private(i, j, k, submat, matsiz, msd2) firstprivate(subpbs, LDQ) \
+            shared(partition, D, Q, perm1, E, WORK, IWORK, WORK_dev)
+        for (j = 0; j < subpbs/2; j++) {
+            i = 2*j - 1;
             if (i == -1) {
                 submat = 0;
                 matsiz = partition[1];
                 msd2 = partition[0];
-                curprb = 0;
             } else {
                 submat = partition[i];
                 matsiz = partition[i+2] - partition[i];
                 msd2 = matsiz / 2;
-                curprb++;
             }
             // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
             // into an eigensystem of size matsiz.
+            k = omp_get_thread_num();
+            cudaSetDevice(k);
             dlaed1(matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
-                &perm1[submat], E[submat+msd2-1], msd2, WORK, WORK_dev,
-                &IWORK[subpbs]);
-            partition[(i-1)/2 + 1] = partition[i+2];
+                &perm1[submat], E[submat+msd2-1], msd2, WORK[k], WORK_dev[k],
+                &IWORK[k][subpbs]);
         }
+        for (i = -1; i < subpbs - 2; i += 2)
+            partition[(i-1)/2 + 1] = partition[i+2];
         subpbs /= 2;
     }
     
@@ -87,13 +95,13 @@ void dlaed0(int N, double *D, double *E, double *Q, int LDQ,
     // final merge step.
     // D = D(perm1);
     for (i = 0; i < N; i++)
-        WORK[i] = D[perm1[i]];
-    cblas_dcopy(N, WORK, 1, D, 1);
+        WORK[0][i] = D[perm1[i]];
+    cblas_dcopy(N, WORK[0], 1, D, 1);
 
     // Q = Q(perm1);
     for (j = 0; j < N; j++) {
         i = perm1[j];
-        cblas_dcopy(N, &Q[i * LDQ], 1, &WORK[(j + 1) * N], 1);
+        cblas_dcopy(N, &Q[i * LDQ], 1, &WORK[0][(j + 1) * N], 1);
     }
-    LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, N, &WORK[N], N, Q, LDQ); 
+    LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, N, &WORK[0][N], N, Q, LDQ); 
 }

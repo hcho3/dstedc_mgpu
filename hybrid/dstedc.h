@@ -1,9 +1,7 @@
 #undef I
 #define SQ(x)   ((x) * (x))
-void dstedc(int N, double *D, double *E, double *Z, int LDZ,
-    double *WORK, double *WORK_dev, int LWORK, int *IWORK, int LIWORK);
-void dlaed0(int N, double *D, double *E, double *Q, int LDQ,
-    double *WORK, double *WORK_dev, int *IWORK);
+void dlaed0_m(int NGPU, int N, double *D, double *E, double *Q, int LDQ,
+    double **WORK, double **WORK_dev, int **IWORK);
 void dlaed1(int N, double *D, double *Q, int LDQ, int *perm1, double RHO,
     int CUTPNT, double *WORK, double *WORK_dev, int *IWORK);
 void dlaed2(int *K, int N, int N1, double *D, double *Q, int LDQ,
