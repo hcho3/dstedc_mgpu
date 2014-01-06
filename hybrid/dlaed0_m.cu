@@ -5,7 +5,7 @@
 #include <omp.h>
 #include "dstedc.h"
 
-#define SMLSIZ 25
+#define SMLSIZ 128
 
 void dlaed0_m(int NGPU, int N, double *D, double *E, double *Q, int LDQ,
     double **WORK, double **WORK_dev, int **IWORK)
@@ -45,6 +45,9 @@ void dlaed0_m(int NGPU, int N, double *D, double *E, double *Q, int LDQ,
     
     // Solve each submatrix eigenvalue problem at the bottom of the divide and
     // conquer tree.
+    #pragma omp parallel for default(none) \
+        private(i, j, k, submat, matsiz) firstprivate(subpbs, LDQ) \
+        shared(partition, D, E, Q, WORK, perm1)
     for (i = -1; i < subpbs - 1; i++) {
         if (i == -1) {
             submat = 0;
@@ -54,7 +57,7 @@ void dlaed0_m(int NGPU, int N, double *D, double *E, double *Q, int LDQ,
             matsiz = partition[i+1] - partition[i];
         }
         LAPACKE_dsteqr_work(LAPACK_COL_MAJOR, 'I', matsiz, &D[submat],
-            &E[submat], &Q[submat + submat * LDQ], LDQ, WORK[0]);
+            &E[submat], &Q[submat + submat * LDQ], LDQ, &WORK[0][2*submat]);
         k = 0;
         for (j = submat; j < partition[i+1]; j++)
             perm1[j] = k++;
