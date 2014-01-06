@@ -1,3 +1,5 @@
+function tester(NGPU)
+
 for i=[1024 2048 4096 8192]
     %{
     v = randn(i, 1);
@@ -14,7 +16,7 @@ for i=[1024 2048 4096 8192]
     fprintf(1, 'i = %d\n', i);
     load(sprintf('input_%d.mat',i));
     load(sprintf('v_%d.mat',i));
-    [d, q] = dlaed0(D, E);
+    [d, q] = dlaed0_m(NGPU, D, E);
     A = diag(D) + diag(E,1) + diag(E,-1);
     fprintf(1, 'max error in eigenvalues = %.20g\n', max(abs(d-sort(v))));
     fprintf(1, 'max error in eigendecomp = %.20g\n', ...
