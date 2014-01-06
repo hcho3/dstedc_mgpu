@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 
     for (i = 0; i < ngpu; i++) {
         cudaSetDevice(i);
-        cudaMallocHost((void **)&WORK[i], (2*N + 2*N*N) * sizeof(double));
+        cudaMallocHost((void **)&WORK[i], (2*N + N*N) * sizeof(double));
         cudaMallocHost((void **)&IWORK[i], (3 + 5 * N) * sizeof(int));
         cudaMalloc((void **)&WORK_dev[i], (2*N + 3*N*N) * sizeof(double));
     }

@@ -19,13 +19,9 @@ rank-one symmetric matrix.
     int K;
     double *Z      = &WORK[0];
     double *DWORK  = &WORK[N];
-    double *QHAT   = &WORK[2 * N];
-    double *QWORK  = &WORK[2 * N + N * N];
+    double *QWORK  = &WORK[2 * N];
 
-    double *Z_dev      = &WORK_dev[0];
-    double *DWORK_dev  = &WORK_dev[N];
-    double *QHAT_dev   = &WORK_dev[2 * N];
-    double *QWORK_dev  = &WORK_dev[2 * N + N * N];
+    double *QHAT_dev   = &WORK_dev[2 * N + N * N];
     double *Q_dev  = &WORK_dev[2 * N + 2 * N * N];
     cublasHandle_t cb_handle;
     double dgemm_param[2] = {1.0, 0.0};
@@ -52,17 +48,12 @@ rank-one symmetric matrix.
     // sovle secular equation
     if (K > 0) {
         cblas_dcopy(K, D, 1, DWORK, 1);
-        dlaed3(K, D, QHAT, K, RHO, DWORK, DWORK_dev, Z, Z_dev,
-            QWORK, QWORK_dev);
+        dlaed3(K, D, QHAT_dev, K, RHO, DWORK, Z, QWORK, WORK_dev);
 
         // back-transformation
-        //LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, K, Q, LDQ, QWORK, N);
-        cublasSetMatrix(N, K, sizeof(double), Q, LDQ, QWORK_dev, N);
-        cublasSetMatrix(K, K, sizeof(double), QHAT, K, QHAT_dev, K);
-        //cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, N, K, K,
-        //    1.0, QWORK, N, QHAT, K, 0.0, Q, LDQ);
+        cublasSetMatrix(N, K, sizeof(double), Q, LDQ, WORK_dev, N);
         cublasDgemm(cb_handle, CUBLAS_OP_N, CUBLAS_OP_N, N, K, K,
-            &dgemm_param[0], QWORK_dev, N, QHAT_dev, K, &dgemm_param[1],
+            &dgemm_param[0], WORK_dev, N, QHAT_dev, K, &dgemm_param[1],
             Q_dev, LDQ);
         cublasGetMatrix(N, K, sizeof(double), Q_dev, LDQ, Q, LDQ);
 

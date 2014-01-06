@@ -62,8 +62,8 @@ void dlaed0_m(int NGPU, int N, double *D, double *E, double *Q, int LDQ,
 
     // Successively merge eigensystems of adjacent submatrices into
     // eigensystem for the corresponding larger matrix.
+    omp_set_num_threads(NGPU);
     while (subpbs > 1) {
-        omp_set_num_threads(NGPU);
         #pragma omp parallel for default(none) \
             private(i, j, k, submat, matsiz, msd2) firstprivate(subpbs, LDQ) \
             shared(partition, D, Q, perm1, E, WORK, IWORK, WORK_dev)
