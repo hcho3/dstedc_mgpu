@@ -61,7 +61,7 @@ int main(int argc, char **argv)
         cudaSetDevice(i);
         cudaMallocHost((void **)&WORK[i], (2*N + N*N) * sizeof(double));
         cudaMallocHost((void **)&IWORK[i], (3 + 5 * N) * sizeof(int));
-        cudaMalloc((void **)&WORK_dev[i], (2*N + 3*N*N) * sizeof(double));
+        cudaMalloc((void **)&WORK_dev[i], (3*N*N) * sizeof(double));
     }
 
 	gettimeofday(&timer1, NULL);

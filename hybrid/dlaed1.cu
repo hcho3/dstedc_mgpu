@@ -21,8 +21,8 @@ rank-one symmetric matrix.
     double *DWORK  = &WORK[N];
     double *QWORK  = &WORK[2 * N];
 
-    double *QHAT_dev   = &WORK_dev[2 * N + N * N];
-    double *Q_dev  = &WORK_dev[2 * N + 2 * N * N];
+    double *QHAT_dev   = &WORK_dev[N * N];
+    double *Q_dev  = &WORK_dev[2 * N * N];
     cublasHandle_t cb_handle;
     double dgemm_param[2] = {1.0, 0.0};
 
