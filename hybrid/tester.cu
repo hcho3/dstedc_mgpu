@@ -29,8 +29,6 @@ int main(int argc, char **argv)
     double **WORK_dev;
     int **IWORK;
 
-    int i;
-
     cudaGetDeviceCount(&MAX_NGPU);
 
     if (argc < 5 || sscanf(argv[1], "%d", &NGPU) < 1 ||
@@ -54,15 +52,9 @@ int main(int argc, char **argv)
     Q_dims[0] = Q_dims[1] = (size_t)N;
     Q = (double *)malloc(N * N * sizeof(double));
 
-    WORK = (double **)malloc(NGPU * sizeof(double *));
-    WORK_dev = (double **)malloc(NGPU * sizeof(double *));
-    IWORK = (int **)malloc(NGPU * sizeof(int *));
-    for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        cudaMallocHost((void **)&WORK[i], (2*N + N*N) * sizeof(double));
-        cudaMallocHost((void **)&IWORK[i], (3 + 5 * N) * sizeof(int));
-        cudaMalloc((void **)&WORK_dev[i], (3*N*N) * sizeof(double));
-    }
+    WORK = allocate_work(NGPU, N);
+    WORK_dev = allocate_work_dev(NGPU, N);
+    IWORK = allocate_iwork(NGPU, N);
 
 	gettimeofday(&timer1, NULL);
     dlaed0_m(NGPU, N, D, E, Q, N, WORK, WORK_dev, IWORK);
@@ -72,19 +64,12 @@ int main(int argc, char **argv)
     write_mat(fout1, "D", D, D_dims);
     write_mat(fout2, "Q", Q, Q_dims);
 
-    for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        cudaFree(WORK_dev[i]);
-        cudaFreeHost(WORK[i]);
-        cudaFreeHost(IWORK[i]);
-    }
-
     free(Q);
     free(D);
     free(E);
-    free(WORK);
-    free(WORK_dev);
-    free(IWORK);
+    free_work(WORK, NGPU);
+    free_work_dev(WORK_dev, NGPU);
+    free_iwork(IWORK, NGPU);
 
     return 0;
 }
@@ -96,3 +81,4 @@ double GetTimerValue(timeval time_1, timeval time_2)
     usec = time_2.tv_usec - time_1.tv_usec;
     return (1000.*(double)(sec) + (double)(usec) * 0.001);
 }
+

@@ -13,3 +13,10 @@ __global__ void dlaed4(int K, double *D, double *Z, double RHO,
     double *tau, double *orig);
 void dlamrg(int N1, int N2, double *A, int DTRD1, int DTRD2, int *perm);
 double dlapy2(double x, double y);
+
+double **allocate_work(int NGPU, int N);
+double **allocate_work_dev(int NGPU, int N);
+int **allocate_iwork(int NGPU, int N);
+void free_work(double **WORK, int NGPU);
+void free_work_dev(double **WORK_dev, int NGPU);
+void free_iwork(int **IWORK, int NGPU);

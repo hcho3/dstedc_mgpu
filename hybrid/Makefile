@@ -11,7 +11,7 @@ CUDA=-L$(CUDA_PATH) -lcublas -lcudadevrt
 TPB=128
 
 tester: dlaed0_m.o dlaed1.o dlaed2.o  \
-		 dlaed3.o dlaed4.o dlamrg.o dlapy2.o matio.o tester.o
+		 dlaed3.o dlaed4.o dlamrg.o dlapy2.o matio.o tester.o workspace.o
 	nvcc $(DEBUG) -o $@ $^ $(MATIO) $(LAPACKE) $(ATLAS) $(CUDA)
 
 dlaed0_m.o: dlaed0_m.cu
@@ -31,6 +31,8 @@ dlapy2.o: dlapy2.cu
 matio.o: matio.cu
 	nvcc $(DEBUG) -c $< -o $@ -I$(HOME)/include
 tester.o: tester.cu
+	nvcc $(DEBUG) -c $< -o $@
+workspace.o: workspace.cu
 	nvcc $(DEBUG) -c $< -o $@
 
 clean:
