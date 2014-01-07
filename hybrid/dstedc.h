@@ -14,6 +14,8 @@ __global__ void dlaed4(int K, double *D, double *Z, double RHO,
 void dlamrg(int N1, int N2, double *A, int DTRD1, int DTRD2, int *perm);
 double dlapy2(double x, double y);
 
+long max_matsiz_host(int NGPU);
+long max_matsiz_gpu(int NGPU);
 double **allocate_work(int NGPU, int N);
 double **allocate_work_dev(int NGPU, int N);
 int **allocate_iwork(int NGPU, int N);
