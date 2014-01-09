@@ -1,8 +1,8 @@
-__device__ __forceinline__ void eval_midpoint(long k, long n, double *delta,
-	double delta_n, double *zeta, double rho, double *fval, double *gval);
+static void eval_midpoint(long k, long n, double *delta, double delta_n,
+    double *zeta, double rho, double *fval, double *gval);
 
-__device__ __forceinline__ void initial_guess(long k, long n, double *delta,
-	double *zeta, double rho, double *tau, double *orig)
+void initial_guess_ph2(long k, long n, double *delta, double *zeta, double rho,
+    double *tau, double *orig)
 {
     double fval, gval;
     double DELTA;
@@ -66,8 +66,8 @@ __device__ __forceinline__ void initial_guess(long k, long n, double *delta,
     *orig = delta[K];
 }
 
-__device__ __forceinline__ void eval_midpoint(long k, long n, double *delta,
-	double delta_n, double *zeta, double rho, double *fval, double *gval)
+static void eval_midpoint(long k, long n, double *delta, double delta_n,
+    double *zeta, double rho, double *fval, double *gval)
 // evaluates the values of f and g at (delta[k] + delta[k+1]) / 2
 {
     double mpt;

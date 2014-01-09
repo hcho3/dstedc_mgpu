@@ -6,15 +6,15 @@
 #include <stdio.h>
 #include "dstedc.h"
 
-void dlaed2(int *K, int N, int N1, double *D, double *Q, int LDQ,
-    int *perm1, double *RHO, double *Z, double *DWORK, double *QWORK,
-    int *perm2, int *permacc, int *perm3) 
+void dlaed2(long *K, long N, long N1, double *D, double *Q, long LDQ,
+    long *perm1, double *RHO, double *Z, double *DWORK, double *QWORK,
+    long *perm2, long *permacc, long *perm3) 
 // merges two lists of eigenvalues and carries out deflation.
 {
-    int N2 = N - N1;
-    int imax, jmax;
-    int i, j, k, ti, pi, ni;
-    int K2;
+    long N2 = N - N1;
+    long imax, jmax;
+    long i, j, k, ti, pi, ni;
+    long K2;
     double tol;
     double t, tau, s, c;
 
@@ -111,7 +111,7 @@ void dlaed2(int *K, int N, int N1, double *D, double *Q, int LDQ,
     // permacc = permacc(perm3)
     for (i = 0; i < N; i++)
         perm2[i] = permacc[perm3[i]];
-    memcpy(permacc, perm2, N * sizeof(int));
+    memcpy(permacc, perm2, N * sizeof(long));
     // D = D(permacc)
     for (i = 0; i < N; i++)
         DWORK[i] = D[permacc[i]];

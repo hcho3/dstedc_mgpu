@@ -14,7 +14,8 @@ double GetTimerValue(timeval time_1, timeval time_2);
 
 int main(int argc, char **argv)
 {
-    int NGPU, MAX_NGPU;
+    int temp;
+    long NGPU, MAX_NGPU;
     const char *fin  = argv[2];
     const char *fout1 = argv[3];
     const char *fout2 = argv[4];
@@ -24,17 +25,18 @@ int main(int argc, char **argv)
     double *D;
     double *E;
     double *Q;
-    int N;
+    long N;
     double **WORK;
     double **WORK_dev;
-    int **IWORK;
+    long **IWORK;
 
-    cudaGetDeviceCount(&MAX_NGPU);
+    cudaGetDeviceCount(&temp);
+    MAX_NGPU = (long)temp;
 
-    if (argc < 5 || sscanf(argv[1], "%d", &NGPU) < 1 ||
+    if (argc < 5 || sscanf(argv[1], "%ld", &NGPU) < 1 ||
         NGPU <= 0 || NGPU > MAX_NGPU) {
         printf("Usage: %s [# of GPUs] [input.mat] [D.mat] [Q.mat]\n", argv[0]);
-        printf("The number of GPUs must be between 1 and %d.\n", MAX_NGPU);
+        printf("The number of GPUs must be between 1 and %ld.\n", MAX_NGPU);
         printf("[input.mat]: name of mat file containing the diagonal and "
                "tridiagonal of the input matrix.\n");
         printf("[D.mat]: name of mat file that will contain the eigenvalues"
@@ -44,10 +46,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    printf("NGPU = %d\n", NGPU);
+    printf("NGPU = %ld\n", NGPU);
     D = read_mat(fin, "D", D_dims);
     E = read_mat(fin, "E", E_dims);
-    N = (D_dims[0] > D_dims[1]) ? (int)D_dims[0] : (int)D_dims[1];
+    N = (D_dims[0] > D_dims[1]) ? (long)D_dims[0] : (long)D_dims[1];
 
     Q_dims[0] = Q_dims[1] = (size_t)N;
     Q = (double *)malloc(N * N * sizeof(double));

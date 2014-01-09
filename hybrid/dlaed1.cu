@@ -4,8 +4,8 @@
 #include <cublas_v2.h>
 #include "dstedc.h"
 
-void dlaed1(int N, double *D, double *Q, int LDQ, int *perm1, double RHO,
-    int CUTPNT, double *WORK, double *WORK_dev, int *IWORK)
+void dlaed1(long N, double *D, double *Q, long LDQ, long *perm1, double RHO,
+    long CUTPNT, double *WORK, double *WORK_dev, long *IWORK)
 /*
 computes the updated eigensystem of a diagonal matrix after modification by a
 rank-one symmetric matrix.
@@ -15,8 +15,8 @@ rank-one symmetric matrix.
     and cutpnt + 1 th elements and zeros elsewhere. 
 */
 {
-    int i;
-    int K;
+    long i;
+    long K;
     double *Z      = &WORK[0];
     double *DWORK  = &WORK[N];
     double *QWORK  = &WORK[2 * N];
@@ -26,9 +26,9 @@ rank-one symmetric matrix.
     cublasHandle_t cb_handle;
     double dgemm_param[2] = {1.0, 0.0};
 
-    int *perm2     = &IWORK[0];
-    int *permacc   = &IWORK[N];
-    int *perm3     = &IWORK[2 * N];
+    long *perm2     = &IWORK[0];
+    long *permacc   = &IWORK[N];
+    long *perm3     = &IWORK[2 * N];
 
     cublasCreate(&cb_handle);
     cublasSetPointerMode(cb_handle, CUBLAS_POINTER_MODE_HOST);

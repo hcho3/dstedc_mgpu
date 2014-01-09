@@ -4,13 +4,30 @@
 #include <unistd.h>
 #include "dstedc.h"
 
-long max_matsiz_gpu(int NGPU)
+#ifdef DEBUG
+#define check( x ) _check( (x), __LINE__ )
+#else
+#define check( x ) (x)
+#endif
+
+static void _check(cudaError_t cs, long line)
+{
+    const char *errstr;
+
+    if (cs != cudaSuccess) {
+        errstr = cudaGetErrorString(cs);
+        printf("CUDA error %s at %ld.\n", errstr, line);
+        exit(1);
+    }
+}
+
+long max_matsiz_gpu(long NGPU)
 {
     long gpu_mem;
     long max_matsiz_gpu;
 
     cudaDeviceProp cdp;
-    int i;
+    long i;
     long min = -5L;
 
     for (i = 0; i < NGPU; i++) {
@@ -25,44 +42,52 @@ long max_matsiz_gpu(int NGPU)
     return max_matsiz_gpu;
 }
 
-long max_matsiz_host(int NGPU)
+long max_matsiz_host(long NGPU)
 {
     long num_pages = sysconf( _SC_PHYS_PAGES );
     long page_size = sysconf( _SC_PAGESIZE ); 
     long host_mem = num_pages * page_size;
     long max_matsiz_host;
 
-    max_matsiz_host = (long)floor(sqrt(13.0 + 0.8*host_mem/8.0/NGPU) - 4.0); 
+    max_matsiz_host
+        = (long)floor(
+            (sqrt(52.0*NGPU*NGPU+(0.4*host_mem-12)*NGPU+0.4*host_mem)-8.0*NGPU)
+            / (2.0*(NGPU+1))); 
 
     return max_matsiz_host;
 }
 
-double **allocate_work(int NGPU, int N)
+double **allocate_work(long NGPU, long N)
 {
     double **WORK;
-    int i;
-    int maxN = (int)max_matsiz_host(NGPU);
+    long i;
+    long maxN = max_matsiz_host(NGPU);
 
     if (N > maxN) {
         printf("The input matrix is too big!\n"
-               "The main memory will hold only %dx%d\n", maxN, maxN);
+               "The main memory will hold only %ldx%ld\n", maxN, maxN);
         exit(1);
     }
 
     WORK = (double **)malloc(NGPU * sizeof(double *));
-    for (i = 0; i < NGPU; i++) {
+
+    cudaSetDevice(0);
+    check(cudaMallocHost((void **)&WORK[0],
+        (2*N + 2*N*N) * sizeof(double)));
+    for (i = 1; i < NGPU; i++) {
         cudaSetDevice(i);
-        cudaMallocHost((void **)&WORK[i], (2*N + N*N) * sizeof(double));
+        check(cudaMallocHost((void **)&WORK[i],
+            (2*N + N*N) * sizeof(double)));
     }
 
     return WORK;
 }
 
-double **allocate_work_dev(int NGPU, int N)
+double **allocate_work_dev(long NGPU, long N)
 {
     double **WORK_dev;
-    int i;
-    int maxN = (int)max_matsiz_gpu(NGPU);
+    long i;
+    long maxN = max_matsiz_gpu(NGPU);
 
     if (N > maxN)
         N = maxN;
@@ -70,29 +95,30 @@ double **allocate_work_dev(int NGPU, int N)
     WORK_dev = (double **)malloc(NGPU * sizeof(double *));
     for (i = 0; i < NGPU; i++) {
         cudaSetDevice(i);
-        cudaMalloc((void **)&WORK_dev[i], (3*N*N) * sizeof(double));
+        check(cudaMalloc((void **)&WORK_dev[i],
+            (3*N*N) * sizeof(double)));
     }
 
     return WORK_dev;
 }
 
-int **allocate_iwork(int NGPU, int N)
+long **allocate_iwork(long NGPU, long N)
 {
-    int **IWORK;
-    int i;
+    long **IWORK;
+    long i;
 
-    IWORK = (int **)malloc(NGPU * sizeof(int *));
+    IWORK = (long **)malloc(NGPU * sizeof(long *));
     for (i = 0; i < NGPU; i++) {
         cudaSetDevice(i);
-        cudaMallocHost((void **)&IWORK[i], (3 + 5*N) * sizeof(int));
+        check(cudaMallocHost((void **)&IWORK[i], (3 + 5*N) * sizeof(long)));
     }
 
     return IWORK;
 }
 
-void free_work(double **WORK, int NGPU)
+void free_work(double **WORK, long NGPU)
 {
-    int i;
+    long i;
 
     for (i = 0; i < NGPU; i++) {
         cudaSetDevice(i);
@@ -102,9 +128,9 @@ void free_work(double **WORK, int NGPU)
     free(WORK);
 }
 
-void free_work_dev(double **WORK_dev, int NGPU)
+void free_work_dev(double **WORK_dev, long NGPU)
 {
-    int i;
+    long i;
 
     for (i = 0; i < NGPU; i++) {
         cudaSetDevice(i);
@@ -114,9 +140,9 @@ void free_work_dev(double **WORK_dev, int NGPU)
     free(WORK_dev);
 }
 
-void free_iwork(int **IWORK, int NGPU)
+void free_iwork(long **IWORK, long NGPU)
 {
-    int i;
+    long i;
 
     for (i = 0; i < NGPU; i++) {
         cudaSetDevice(i);

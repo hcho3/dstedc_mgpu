@@ -1,45 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <matio.h>
+#include <mat.h>
 #include "dstedc.h"
 
 double *read_mat(const char *filename, const char *varname, size_t *dims)
 {
-    mat_t *mat;
-    matvar_t *var;
+    MATFile *pmat;
+    mxArray *pa;
     double *array;
     size_t nbytes;
 
-    mat = Mat_Open(filename, MAT_ACC_RDONLY);
-    if (!mat) {
+    pmat = matOpen(filename, "r");
+    if (!pmat) {
         fprintf(stderr, "Error opening MAT file \"%s\"!\n", filename);
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
-    var = Mat_VarRead(mat, varname);
+    pa = matGetVariable(pmat, varname);
 
-    if (!var) {
+    if (!pa) {
         fprintf(stderr, "Error reading the variable %s.\n", varname);
-        Mat_Close(mat);
-        exit(EXIT_FAILURE);
+        matClose(pmat);
+        exit(1);
     }
 
-    if (var->data_type != MAT_T_DOUBLE || var->class_type != MAT_C_DOUBLE
-        || var->rank != 2) {
+    if (!mxIsDouble(pa) || mxGetNumberOfDimensions(pa) != 2) {
         fprintf(stderr, "%s is not a double-precision matrix.\n", varname);
-        Mat_VarFree(var);
-        Mat_Close(mat);
-        exit(EXIT_FAILURE);
+        mxDestroyArray(pa);
+        matClose(pmat);
+        exit(1);
     }
 
-    nbytes = var->dims[0] * var->dims[1] * sizeof(double);
+    nbytes = mxGetNumberOfElements(pa) * sizeof(double);
     array = (double *)malloc(nbytes);
-    memcpy(array, var->data, nbytes);
-    memcpy(dims, var->dims, 2 * sizeof(size_t));
+    memcpy(array, mxGetPr(pa), nbytes);
+    memcpy(dims, mxGetDimensions(pa), 2 * sizeof(size_t));
 
-    Mat_VarFree(var);
-    Mat_Close(mat);
+    mxDestroyArray(pa);
+    matClose(pmat);
 
     return array;
 }
@@ -47,24 +46,31 @@ double *read_mat(const char *filename, const char *varname, size_t *dims)
 void write_mat(const char *filename, const char *varname,
     double *array, size_t *dims)
 {
-    mat_t *mat;
-    matvar_t *var;
-    
-    mat = Mat_CreateVer(filename, NULL, MAT_FT_DEFAULT);
-    if (!mat) {
+    MATFile *pmat;
+    mxArray *pa;
+    int status;
+
+    pmat = matOpen(filename, "w");
+    if (!pmat) {
         fprintf(stderr, "Error creating MAT file \"%s\"\n", filename);
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
-    var = Mat_VarCreate(varname, MAT_C_DOUBLE, MAT_T_DOUBLE,
-                        2, dims, array, 0);
-    if (!var) {
+    pa = mxCreateDoubleMatrix(dims[0], dims[1], mxREAL);
+    if (!pa) {
         fprintf(stderr, "Error creating variable %s.\n", varname);
-        Mat_Close(mat);
-        exit(EXIT_FAILURE);
+        matClose(pmat);
+        exit(1);
+    }
+    memcpy(mxGetPr(pa), array, dims[0]*dims[1]*sizeof(double));
+    status = matPutVariable(pmat, varname, pa);
+    if (status != 0) {
+        fprintf(stderr, "Error writing variable %s.\n", varname);
+        mxDestroyArray(pa);
+        matClose(pmat);
+        exit(1);
     }
 
-    Mat_VarWrite(mat, var, MAT_COMPRESSION_NONE);
-    Mat_VarFree(var);
-    Mat_Close(mat);
+    mxDestroyArray(pa);
+    matClose(pmat);
 }

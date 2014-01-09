@@ -9,14 +9,14 @@
 // CUDA toolchain does not support inlining of a function in different
 // compilation unit.
 
-__global__ void dlaed4(int K, double *D, double *Z, double RHO,
+__global__ void dlaed4(long K, double *D, double *Z, double RHO,
     double *tau, double *orig)
 // compute the i-th eigenvalue of the perturbed matrix D + rho * z * z**T
 // tau+orig gives the computed eigenvalue.
 {
-    int it;
+    long it;
     double eta, tol;
-    int I = threadIdx.x + blockIdx.x * blockDim.x;
+    long I = threadIdx.x + blockIdx.x * blockDim.x;
 
     if (I >= K)
         return;

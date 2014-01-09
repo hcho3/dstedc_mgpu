@@ -1,5 +1,5 @@
-__device__ __forceinline__ double middle_way(long k, long n, double *delta,
-	double *zeta, double rho, double tau, double orig)
+double middle_way_ph2(long k, long n, double *delta, double *zeta, double rho,
+    double tau, double orig)
 {
     double DELTA_k, DELTA_k_1;
     double DELTA_n_2, DELTA_n_1;

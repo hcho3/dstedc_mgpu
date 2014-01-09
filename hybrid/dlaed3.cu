@@ -3,12 +3,12 @@
 #include <math.h>
 #include "dstedc.h"
 
-__global__ static void inv_eig(int K, double *v, double *DLAMDA, double *W,
+__global__ static void inv_eig(long K, double *v, double *DLAMDA, double *W,
     double *tau, double *orig);
-__global__ static void eigvec(int K, double *D, double *QHAT, int LDQHAT,
+__global__ static void eigvec(long K, double *D, double *QHAT, long LDQHAT,
     double *v, double *DLAMDA, double *tau, double *orig);
 
-void dlaed3(int K, double *D, double *QHAT_dev, int LDQHAT, double RHO,
+void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
     double *DLAMDA, double *W, double *S, double *WORK_dev)
 // stably computes the eigendecomposition Q * diag(lambda) * Q**T  of
 // diag(delta) + RHO * z * z**T  by solving an inverse eigenvalue problem.
@@ -39,11 +39,11 @@ void dlaed3(int K, double *D, double *QHAT_dev, int LDQHAT, double RHO,
     cudaMemcpy(D, D_dev, K * sizeof(double), cudaMemcpyDeviceToHost); 
 }
 
-__global__ static void inv_eig(int K, double *v, double *DLAMDA, double *W,
+__global__ static void inv_eig(long K, double *v, double *DLAMDA, double *W,
     double *tau, double *orig)
 {
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
-    int j;
+    long i = threadIdx.x + blockIdx.x * blockDim.x;
+    long j;
 
     if (i >= K)
         return;
@@ -56,11 +56,11 @@ __global__ static void inv_eig(int K, double *v, double *DLAMDA, double *W,
     v[i] = copysign(sqrt(v[i]), W[i]);
 }
 
-__global__ static void eigvec(int K, double *D, double *QHAT, int LDQHAT,
+__global__ static void eigvec(long K, double *D, double *QHAT, long LDQHAT,
     double *v, double *DLAMDA, double *tau, double *orig)
 {
-    int j = threadIdx.x + blockIdx.x * blockDim.x;
-    int i;
+    long j = threadIdx.x + blockIdx.x * blockDim.x;
+    long i;
     double temp = 0.0;
 
     if (j >= K)

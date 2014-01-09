@@ -1,11 +1,11 @@
-void dlamrg(int N1, int N2, double *A, int DTRD1, int DTRD2, int *perm)
+void dlamrg(long N1, long N2, double *A, long DTRD1, long DTRD2, long *perm)
 // computes a permutation which merges two sorted lists A(1:N1) and A(N1+1:end)
 // into a single sorted list in ascending order.
 {
-    int i = (DTRD1 > 0) ? 0 : (N1 - 1);
-    int j = (DTRD2 > 0) ? N1 : (N1 + N2 - 1);
-    int k;
-    int idx = 0;
+    long i = (DTRD1 > 0) ? 0 : (N1 - 1);
+    long j = (DTRD2 > 0) ? N1 : (N1 + N2 - 1);
+    long k;
+    long idx = 0;
 
     while (N1 > 0 && N2 > 0) {
         if (A[i] <= A[j]) {
