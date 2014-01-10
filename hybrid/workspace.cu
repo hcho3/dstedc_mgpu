@@ -4,11 +4,7 @@
 #include <unistd.h>
 #include "dstedc.h"
 
-#ifdef DEBUG
 #define check( x ) _check( (x), __LINE__ )
-#else
-#define check( x ) (x)
-#endif
 
 static void _check(cudaError_t cs, long line)
 {

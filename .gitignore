@@ -4,5 +4,6 @@ tester
 dstevd_c
 dstedc_c
 *.mat
+*.bin
 *.log
 *.nvprof

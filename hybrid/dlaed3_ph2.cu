@@ -1,6 +1,7 @@
 #include <cblas.h>
 #include <stdio.h>
 #include <math.h>
+#include <omp.h>
 #include "dstedc.h"
 
 void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
@@ -15,11 +16,17 @@ void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
     long i, j;
     double temp;
 
+    omp_set_num_threads(omp_get_num_procs());
+    
+    #pragma omp parallel for default(none) \
+        private(i) firstprivate(K, RHO) shared(DLAMDA, W, tau, orig)
     for (i = 0; i < K; i++)
         dlaed4_ph2(K, i, DLAMDA, W, RHO, &tau[i], &orig[i]);
 
     // inverse eigenvalue problem: find v such that lambda(1), ..., lambda(n)
     // are exact eigenvalues of the matrix D + v * v**T.
+    #pragma omp parallel for default(none) \
+        private(i, j) firstprivate(K) shared(DLAMDA, W, v, tau, orig)
     for (i = 0; i < K; i++) {
         v[i] = orig[i] - DLAMDA[i] + tau[i];
         for (j = 0; j < i; j++)
@@ -30,9 +37,11 @@ void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
     }
 
     // compute the eigenvectors of D + v * v**T
-    for (i = 0; i < K; i++)
-        D[i] = tau[i] + orig[i];
+    #pragma omp parallel for default(none) \
+        private(i, j, temp) firstprivate(K, LDQHAT) \
+        shared(D, DLAMDA, QHAT, v, tau, orig)
     for (j = 0; j < K; j++) {
+        D[j] = tau[j] + orig[j];
         for (i = 0; i < K; i++)
             QHAT[i + j * LDQHAT] = v[i] / (orig[j] - DLAMDA[i] + tau[j]);
         temp = cblas_dnrm2(K, &QHAT[j * LDQHAT], 1); 

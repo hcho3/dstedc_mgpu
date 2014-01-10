@@ -79,7 +79,6 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
             if (matsiz > pbmax)
                 pbmax = matsiz;
         }
-        printf("pbmax = %ld\n", pbmax);
         if (pbmax > pbcap)
             break;
 
@@ -122,7 +121,6 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
             if (matsiz > pbmax)
                 pbmax = matsiz;
         }
-        printf("pbmax = %ld\n", pbmax);
 
         for (j = 0; j < subpbs/2; j++) {
             i = 2*j - 1;

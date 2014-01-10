@@ -1,76 +1,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mat.h>
 #include "dstedc.h"
 
-double *read_mat(const char *filename, const char *varname, size_t *dims)
+double *read_mat(const char *filename, long *dims)
 {
-    MATFile *pmat;
-    mxArray *pa;
+    FILE *fp;
     double *array;
-    size_t nbytes;
+    long M, N, nelem;
 
-    pmat = matOpen(filename, "r");
-    if (!pmat) {
-        fprintf(stderr, "Error opening MAT file \"%s\"!\n", filename);
+    fp = fopen(filename, "r");
+    if (!fp) {
+        fprintf(stderr, "Error opening matrix file \"%s\"!\n", filename);
         exit(1);
     }
 
-    pa = matGetVariable(pmat, varname);
-
-    if (!pa) {
-        fprintf(stderr, "Error reading the variable %s.\n", varname);
-        matClose(pmat);
-        exit(1);
+    // matrix dimensions
+    if (fread(&M, sizeof(long), 1, fp) < 1 ||
+        fread(&N, sizeof(long), 1, fp) < 1 ||
+        M <= 0 || N <= 0) {
+        fprintf(stderr, "Invalid matrix dimensions\n");
+        fclose(fp);
+        exit(2);
     }
 
-    if (!mxIsDouble(pa) || mxGetNumberOfDimensions(pa) != 2) {
-        fprintf(stderr, "%s is not a double-precision matrix.\n", varname);
-        mxDestroyArray(pa);
-        matClose(pmat);
-        exit(1);
+    dims[0] = M;
+    dims[1] = N;
+    nelem = M * N;
+    array = (double *)malloc(nelem * sizeof(double));
+
+    // matrix
+    if (fread(array, sizeof(double), nelem, fp) < (size_t)nelem) {
+        fprintf(stderr, "The matrix contains fewer entries than "
+                        "the specified dimensions %ldx%ld.\n", M, N);
+        free(array);
+        fclose(fp);
+        exit(3);
     }
 
-    nbytes = mxGetNumberOfElements(pa) * sizeof(double);
-    array = (double *)malloc(nbytes);
-    memcpy(array, mxGetPr(pa), nbytes);
-    memcpy(dims, mxGetDimensions(pa), 2 * sizeof(size_t));
-
-    mxDestroyArray(pa);
-    matClose(pmat);
+    fclose(fp);
 
     return array;
 }
 
-void write_mat(const char *filename, const char *varname,
-    double *array, size_t *dims)
+void write_mat(const char *filename, double *array, long *dims)
 {
-    MATFile *pmat;
-    mxArray *pa;
-    int status;
+    FILE *fp;
+    long M, N, nelem;
 
-    pmat = matOpen(filename, "w");
-    if (!pmat) {
-        fprintf(stderr, "Error creating MAT file \"%s\"\n", filename);
+    fp = fopen(filename, "w");
+
+    if (!fp) {
+        fprintf(stderr, "Error creating matrix file \"%s\"\n", filename);
         exit(1);
     }
 
-    pa = mxCreateDoubleMatrix(dims[0], dims[1], mxREAL);
-    if (!pa) {
-        fprintf(stderr, "Error creating variable %s.\n", varname);
-        matClose(pmat);
-        exit(1);
-    }
-    memcpy(mxGetPr(pa), array, dims[0]*dims[1]*sizeof(double));
-    status = matPutVariable(pmat, varname, pa);
-    if (status != 0) {
-        fprintf(stderr, "Error writing variable %s.\n", varname);
-        mxDestroyArray(pa);
-        matClose(pmat);
-        exit(1);
+    M = dims[0];
+    N = dims[1];
+    nelem = M * N;
+
+    // matrix dimensions
+    if (fwrite(&M, sizeof(long), 1, fp) < 1 ||
+        fwrite(&N, sizeof(long), 1, fp) < 1) {
+        fprintf(stderr, "Error recording the matrix dimensions to file.\n");
+        fclose(fp);
+        exit(4);
     }
 
-    mxDestroyArray(pa);
-    matClose(pmat);
+    // matrix
+    if (fwrite(array, sizeof(double), nelem, fp) < (size_t)nelem) {
+        fprintf(stderr, "Error saving the matrix to file.\n");
+        fclose(fp);
+        exit(5);
+    }
+
+    fclose(fp);
 }

@@ -5,23 +5,19 @@
 #include <sys/time.h>
 #include "dstedc.h"
 
-extern double *read_mat(const char *filename, const char *varname,
-    size_t *dims);
-extern void write_mat(const char *filename, const char *varname,
-    double *array, size_t *dims);
-
 double GetTimerValue(timeval time_1, timeval time_2);
 
 int main(int argc, char **argv)
 {
     int temp;
     long NGPU, MAX_NGPU;
-    const char *fin  = argv[2];
-    const char *fout1 = argv[3];
-    const char *fout2 = argv[4];
+    const char *Din  = argv[2];
+    const char *Ein  = argv[3];
+    const char *Dout = argv[4];
+    const char *Qout = argv[5];
 	timeval timer1, timer2;
     
-    size_t D_dims[2], E_dims[2], Q_dims[2];
+    long D_dims[2], E_dims[2], Q_dims[2];
     double *D;
     double *E;
     double *Q;
@@ -33,25 +29,28 @@ int main(int argc, char **argv)
     cudaGetDeviceCount(&temp);
     MAX_NGPU = (long)temp;
 
-    if (argc < 5 || sscanf(argv[1], "%ld", &NGPU) < 1 ||
+    if (argc < 6 || sscanf(argv[1], "%ld", &NGPU) < 1 ||
         NGPU <= 0 || NGPU > MAX_NGPU) {
-        printf("Usage: %s [# of GPUs] [input.mat] [D.mat] [Q.mat]\n", argv[0]);
+        printf("Usage: %s [# of GPUs] [Din.bin] [E.bin] [Dout.bin] [Q.bin]\n",
+            argv[0]);
         printf("The number of GPUs must be between 1 and %ld.\n", MAX_NGPU);
-        printf("[input.mat]: name of mat file containing the diagonal and "
-               "tridiagonal of the input matrix.\n");
-        printf("[D.mat]: name of mat file that will contain the eigenvalues"
-               " on exit.\n");
-        printf("[Q.mat]: name of mat file that will contain the eigenvectors"
-               " on exit.\n");
+        printf("[Din.bin]: file containing the diagonal of the input "
+               "tridiagonal matrix.\n");
+        printf("[Ein.bin]: file containing the subdiagonal of the input "
+               "tridiagonal matrix.\n");
+        printf("[Dout.bin]: file that will contain the eigenvalues of the "
+               "input matrix on exit.\n");
+        printf("[Q.bin]: file that will contain the eigenvectors of the "
+               "input matrix on exit.\n");
         return 1;
     }
 
     printf("NGPU = %ld\n", NGPU);
-    D = read_mat(fin, "D", D_dims);
-    E = read_mat(fin, "E", E_dims);
-    N = (D_dims[0] > D_dims[1]) ? (long)D_dims[0] : (long)D_dims[1];
+    D = read_mat(Din, D_dims);
+    E = read_mat(Ein, E_dims);
+    N = (D_dims[0] > D_dims[1]) ? D_dims[0] : D_dims[1];
 
-    Q_dims[0] = Q_dims[1] = (size_t)N;
+    Q_dims[0] = Q_dims[1] = N;
     Q = (double *)malloc(N * N * sizeof(double));
 
     WORK = allocate_work(NGPU, N);
@@ -63,8 +62,8 @@ int main(int argc, char **argv)
 	gettimeofday(&timer2, NULL);
 	printf("Time: %.3lf s\n", GetTimerValue(timer1, timer2) / 1000.0 );
 
-    write_mat(fout1, "D", D, D_dims);
-    write_mat(fout2, "Q", Q, Q_dims);
+    write_mat(Dout, D, D_dims);
+    write_mat(Qout, Q, Q_dims);
 
     free(Q);
     free(D);

@@ -8,9 +8,6 @@
 
 #ifdef DEBUG
 #define check( x ) _check( (x), __LINE__ )
-#else
-#define check( x ) (x)
-#endif
 
 static void _check(cublasStatus_t cs, long line)
 {
@@ -41,6 +38,9 @@ static void _check(cublasStatus_t cs, long line)
         exit(1);
     }
 }
+#else
+#define check( x ) (x)
+#endif
 
 void dlaed1_ph2(long NGPU, long N, double *D, double *Q, long LDQ, long *perm1,
     double RHO, long CUTPNT, double *WORK, double **WORK_dev, long *IWORK)

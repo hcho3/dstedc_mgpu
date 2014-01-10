@@ -28,3 +28,6 @@ long **allocate_iwork(long NGPU, long N);
 void free_work(double **WORK, long NGPU);
 void free_work_dev(double **WORK_dev, long NGPU);
 void free_iwork(long **IWORK, long NGPU);
+
+double *read_mat(const char *filename, long *dims);
+void write_mat(const char *filename, double *array, long *dims);
