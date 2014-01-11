@@ -3,19 +3,7 @@
 #include <math.h>
 #include <unistd.h>
 #include "dstedc.h"
-
-#define check( x ) _check( (x), __LINE__ )
-
-static void _check(cudaError_t cs, long line)
-{
-    const char *errstr;
-
-    if (cs != cudaSuccess) {
-        errstr = cudaGetErrorString(cs);
-        printf("CUDA error %s at %ld.\n", errstr, line);
-        exit(1);
-    }
-}
+#include "safety.h"
 
 long max_matsiz_gpu(long NGPU)
 {
@@ -27,7 +15,7 @@ long max_matsiz_gpu(long NGPU)
     long min = -5L;
 
     for (i = 0; i < NGPU; i++) {
-        cudaGetDeviceProperties(&cdp, i);
+        safe_cudaGetDeviceProperties(&cdp, i);
         if (cdp.totalGlobalMem < min || min < 0L)
             min = cdp.totalGlobalMem;
     }
@@ -67,13 +55,13 @@ double **allocate_work(long NGPU, long N)
 
     WORK = (double **)malloc(NGPU * sizeof(double *));
 
-    cudaSetDevice(0);
-    check(cudaMallocHost((void **)&WORK[0],
-        (2*N + 2*N*N) * sizeof(double)));
+    safe_cudaSetDevice(0);
+    safe_cudaMallocHost((void **)&WORK[0],
+        (2*N + 2*N*N) * sizeof(double));
     for (i = 1; i < NGPU; i++) {
-        cudaSetDevice(i);
-        check(cudaMallocHost((void **)&WORK[i],
-            (2*N + N*N) * sizeof(double)));
+        safe_cudaSetDevice(i);
+        safe_cudaMallocHost((void **)&WORK[i],
+            (2*N + N*N) * sizeof(double));
     }
 
     return WORK;
@@ -90,9 +78,9 @@ double **allocate_work_dev(long NGPU, long N)
 
     WORK_dev = (double **)malloc(NGPU * sizeof(double *));
     for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        check(cudaMalloc((void **)&WORK_dev[i],
-            (3*N*N) * sizeof(double)));
+        safe_cudaSetDevice(i);
+        safe_cudaMalloc((void **)&WORK_dev[i],
+            (3*N*N) * sizeof(double));
     }
 
     return WORK_dev;
@@ -105,8 +93,8 @@ long **allocate_iwork(long NGPU, long N)
 
     IWORK = (long **)malloc(NGPU * sizeof(long *));
     for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        check(cudaMallocHost((void **)&IWORK[i], (3 + 5*N) * sizeof(long)));
+        safe_cudaSetDevice(i);
+        safe_cudaMallocHost((void **)&IWORK[i], (3 + 5*N) * sizeof(long));
     }
 
     return IWORK;
@@ -117,8 +105,8 @@ void free_work(double **WORK, long NGPU)
     long i;
 
     for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        cudaFreeHost(WORK[i]);
+        safe_cudaSetDevice(i);
+        safe_cudaFreeHost(WORK[i]);
     }
 
     free(WORK);
@@ -129,8 +117,8 @@ void free_work_dev(double **WORK_dev, long NGPU)
     long i;
 
     for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        cudaFree(WORK_dev[i]);
+        safe_cudaSetDevice(i);
+        safe_cudaFree(WORK_dev[i]);
     }
 
     free(WORK_dev);
@@ -141,8 +129,8 @@ void free_iwork(long **IWORK, long NGPU)
     long i;
 
     for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        cudaFreeHost(IWORK[i]);
+        safe_cudaSetDevice(i);
+        safe_cudaFreeHost(IWORK[i]);
     }
 
     free(IWORK);

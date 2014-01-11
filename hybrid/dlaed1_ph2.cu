@@ -5,42 +5,8 @@
 #include <cublas_v2.h>
 #include <omp.h>
 #include "dstedc.h"
-
-#ifdef DEBUG
-#define check( x ) _check( (x), __LINE__ )
-
-static void _check(cublasStatus_t cs, long line)
-{
-    const char *errstr;
-
-    if (cs != CUBLAS_STATUS_SUCCESS) {
-        switch(cs) {
-            case CUBLAS_STATUS_SUCCESS:
-                errstr = "CUBLAS_STATUS_SUCCESS"; break;
-            case CUBLAS_STATUS_NOT_INITIALIZED:
-                errstr = "CUBLAS_STATUS_NOT_INITIALIZED"; break;
-            case CUBLAS_STATUS_ALLOC_FAILED:
-                errstr = "CUBLAS_STATUS_ALLOC_FAILED"; break;
-            case CUBLAS_STATUS_INVALID_VALUE:
-                errstr = "CUBLAS_STATUS_INVALID_VALUE"; break;
-            case CUBLAS_STATUS_ARCH_MISMATCH:
-                errstr = "CUBLAS_STATUS_ARCH_MISMATCH"; break;
-            case CUBLAS_STATUS_MAPPING_ERROR:
-                errstr = "CUBLAS_STATUS_MAPPING_ERROR"; break;
-            case CUBLAS_STATUS_EXECUTION_FAILED:
-                errstr = "CUBLAS_STATUS_EXECUTION_FAILED"; break;
-            case CUBLAS_STATUS_INTERNAL_ERROR:
-                errstr = "CUBLAS_STATUS_INTERNAL_ERROR"; break;
-            default:
-                errstr = "unknown";
-        }
-        printf("CUBLAS error %s at %ld.\n", errstr, line);
-        exit(1);
-    }
-}
-#else
-#define check( x ) (x)
-#endif
+#include "nvtx.h"
+#include "safety.h"
 
 void dlaed1_ph2(long NGPU, long N, double *D, double *Q, long LDQ, long *perm1,
     double RHO, long CUTPNT, double *WORK, double **WORK_dev, long *IWORK)
@@ -53,6 +19,8 @@ rank-one symmetric matrix.
     and cutpnt + 1 th elements and zeros elsewhere. 
 */
 {
+    RANGE_START("dlaed1_ph2", 1, 1);
+
     long i, j, k, id;
     long blki, blkj, blkk;
 
@@ -109,9 +77,9 @@ rank-one symmetric matrix.
 
         // back-transformation
         for (i = 0; i < NGPU; i++) {
-            cudaSetDevice(i);
-            cublasCreate(&cb_handle[i]);
-            cublasSetPointerMode(cb_handle[i], CUBLAS_POINTER_MODE_HOST);
+            safe_cudaSetDevice(i);
+            safe_cublasCreate(&cb_handle[i]);
+            safe_cublasSetPointerMode(cb_handle[i], CUBLAS_POINTER_MODE_HOST);
         }
         // compute block matrix partition
         parN[0] = 0;
@@ -136,28 +104,28 @@ rank-one symmetric matrix.
                 blkk = parK[1] - parK[0];
                 blkj = parK[j+1] - parK[j];
                 id = omp_get_thread_num();
-                cudaSetDevice(id);
-                check(cublasSetMatrix(blki, blkk, sizeof(double),
-                    &Q[parN[i]], LDQ, WORK_dev[id], blki));
-                check(cublasSetMatrix(blkk, blkj, sizeof(double),
-                    &QHAT[parK[j]*K], K, QHAT_dev[id], blkk));
-                check(cublasDgemm(cb_handle[id], CUBLAS_OP_N, CUBLAS_OP_N,
+                safe_cudaSetDevice(id);
+                safe_cublasSetMatrix(blki, blkk, sizeof(double),
+                    &Q[parN[i]], LDQ, WORK_dev[id], blki);
+                safe_cublasSetMatrix(blkk, blkj, sizeof(double),
+                    &QHAT[parK[j]*K], K, QHAT_dev[id], blkk);
+                safe_cublasDgemm(cb_handle[id], CUBLAS_OP_N, CUBLAS_OP_N,
                     blki, blkj, blkk, &one,
                     WORK_dev[id], blki, QHAT_dev[id], blkk, &zero,
-                    Q_dev[id], blki));
+                    Q_dev[id], blki);
                 for (k = 1; k < pardim; k++) {
                     blkk = parK[k+1] - parK[k];
-                    check(cublasSetMatrix(blki, blkk, sizeof(double),
-                        &Q[parN[i] + parK[k]*LDQ], LDQ, WORK_dev[id], blki));
-                    check(cublasSetMatrix(blkk, blkj, sizeof(double),
-                        &QHAT[parK[k] + parK[j]*K], K, QHAT_dev[id], blkk));
-                    check(cublasDgemm(cb_handle[id], CUBLAS_OP_N, CUBLAS_OP_N,
+                    safe_cublasSetMatrix(blki, blkk, sizeof(double),
+                        &Q[parN[i] + parK[k]*LDQ], LDQ, WORK_dev[id], blki);
+                    safe_cublasSetMatrix(blkk, blkj, sizeof(double),
+                        &QHAT[parK[k] + parK[j]*K], K, QHAT_dev[id], blkk);
+                    safe_cublasDgemm(cb_handle[id], CUBLAS_OP_N, CUBLAS_OP_N,
                         blki, blkj, blkk, &one,
                         WORK_dev[id], blki, QHAT_dev[id], blkk, &one,
-                        Q_dev[id], blki));
+                        Q_dev[id], blki);
                 }
-                check(cublasGetMatrix(blki, blkj, sizeof(double),
-                    Q_dev[id], blki, &QWORK[parN[i] + parK[j]*N], N));
+                safe_cublasGetMatrix(blki, blkj, sizeof(double),
+                    Q_dev[id], blki, &QWORK[parN[i] + parK[j]*N], N);
             }
         }
         LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, K, QWORK, N, Q, LDQ);
@@ -170,12 +138,14 @@ rank-one symmetric matrix.
     }
 
     for (i = 0; i < NGPU; i++) {
-        cudaSetDevice(i);
-        cublasDestroy(cb_handle[i]);
+        safe_cudaSetDevice(i);
+        safe_cublasDestroy(cb_handle[i]);
     }
     free(cb_handle);
     free(QHAT_dev);
     free(Q_dev);
     free(parK);
     free(parN);
+
+    RANGE_END(1);
 }

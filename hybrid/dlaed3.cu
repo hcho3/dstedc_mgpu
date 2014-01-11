@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "dstedc.h"
+#include "nvtx.h"
+#include "safety.h"
 
 __global__ static void inv_eig(long K, double *v, double *DLAMDA, double *W,
     double *tau, double *orig);
@@ -9,10 +11,12 @@ __global__ static void eigvec(long K, double *D, double *QHAT, long LDQHAT,
     double *v, double *DLAMDA, double *tau, double *orig);
 
 void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
-    double *DLAMDA, double *W, double *S, double *WORK_dev)
+    double *DLAMDA, double *W, double *WORK_dev)
 // stably computes the eigendecomposition Q * diag(lambda) * Q**T  of
 // diag(delta) + RHO * z * z**T  by solving an inverse eigenvalue problem.
 {
+    RANGE_START("dlaed3", 1, 3);
+
     double *W_dev      = &WORK_dev[0];
     double *DLAMDA_dev = &WORK_dev[K];
     double *tau_dev    = &WORK_dev[2 * K];
@@ -20,12 +24,13 @@ void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
     double *v_dev      = &WORK_dev[4 * K];
     double *D_dev      = &WORK_dev[5 * K];
 
-    cudaMemcpy(DLAMDA_dev, DLAMDA, K * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(W_dev, W, K * sizeof(double), cudaMemcpyHostToDevice);
+    safe_cudaMemcpy(DLAMDA_dev, DLAMDA, K * sizeof(double),
+        cudaMemcpyHostToDevice);
+    safe_cudaMemcpy(W_dev, W, K * sizeof(double), cudaMemcpyHostToDevice);
 
     dlaed4<<<(K+TPB-1)/TPB, TPB>>>(K, DLAMDA_dev, W_dev, RHO,
         tau_dev, orig_dev);
-    cudaDeviceSynchronize();
+    safe_cudaDeviceSynchronize();
 
     // inverse eigenvalue problem: find v such that lambda(1), ..., lambda(n)
     // are exact eigenvalues of the matrix D + v * v**T.
@@ -36,7 +41,9 @@ void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
     eigvec<<<(K+TPB-1)/TPB, TPB>>>(K, D_dev, QHAT_dev, LDQHAT, v_dev,
         DLAMDA_dev, tau_dev, orig_dev);
 
-    cudaMemcpy(D, D_dev, K * sizeof(double), cudaMemcpyDeviceToHost); 
+    safe_cudaMemcpy(D, D_dev, K * sizeof(double), cudaMemcpyDeviceToHost); 
+
+    RANGE_END(1);
 }
 
 __global__ static void inv_eig(long K, double *v, double *DLAMDA, double *W,

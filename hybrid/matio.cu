@@ -2,9 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include "dstedc.h"
+#include "nvtx.h"
 
 double *read_mat(const char *filename, long *dims)
 {
+    char temp[BUFSIZ];
+    strcpy(temp, "read_mat(");
+    strcat(temp, filename);
+    strcat(temp, ")");
+    RANGE_START(temp, 1, 5);
+
     FILE *fp;
     double *array;
     long M, N, nelem;
@@ -40,11 +47,19 @@ double *read_mat(const char *filename, long *dims)
 
     fclose(fp);
 
+    RANGE_END(1);
+
     return array;
 }
 
 void write_mat(const char *filename, double *array, long *dims)
 {
+    char temp[BUFSIZ];
+    strcpy(temp, "write_mat(");
+    strcat(temp, filename);
+    strcat(temp, ")");
+    RANGE_START(temp, 1, 6);
+
     FILE *fp;
     long M, N, nelem;
 
@@ -75,4 +90,6 @@ void write_mat(const char *filename, double *array, long *dims)
     }
 
     fclose(fp);
+
+    RANGE_END(1);
 }

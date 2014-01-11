@@ -5,12 +5,15 @@
 #include <string.h>
 #include <stdio.h>
 #include "dstedc.h"
+#include "nvtx.h"
 
 void dlaed2(long *K, long N, long N1, double *D, double *Q, long LDQ,
     long *perm1, double *RHO, double *Z, double *DWORK, double *QWORK,
     long *perm2, long *permacc, long *perm3) 
 // merges two lists of eigenvalues and carries out deflation.
 {
+    RANGE_START("dlaed2", 1, 2);
+
     long N2 = N - N1;
     long imax, jmax;
     long i, j, k, ti, pi, ni;
@@ -55,6 +58,9 @@ void dlaed2(long *K, long N, long N1, double *D, double *Q, long LDQ,
             cblas_dcopy(N, &Q[i * LDQ], 1, &QWORK[j * N], 1);
         }
         LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, N, QWORK, N, Q, LDQ);
+
+        RANGE_END(1);
+
         return;
     }
 
@@ -126,4 +132,6 @@ void dlaed2(long *K, long N, long N1, double *D, double *Q, long LDQ,
     for (i = 0; i < N; i++)
         DWORK[i] = Z[permacc[i]];
     cblas_dcopy(N, DWORK, 1, Z, 1);
+
+    RANGE_END(1);
 }

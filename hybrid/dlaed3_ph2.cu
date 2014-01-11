@@ -3,12 +3,15 @@
 #include <math.h>
 #include <omp.h>
 #include "dstedc.h"
+#include "nvtx.h"
 
 void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
     double *DLAMDA, double *W, double *S)
 // stably computes the eigendecomposition Q * diag(lambda) * Q**T  of
 // diag(delta) + RHO * z * z**T  by solving an inverse eigenvalue problem.
 {
+    RANGE_START("dlaed3_ph2", 1, 3);
+
     double *tau  = &S[0];
     double *orig = &S[K];
     double *v    = &S[2 * K];
@@ -48,4 +51,6 @@ void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
         for (i = 0; i < K; i++)
             QHAT[i + j * LDQHAT] /= temp;
     }
+
+    RANGE_END(1);
 }

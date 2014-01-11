@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <sys/time.h>
 #include "dstedc.h"
+#include "safety.h"
 
 double GetTimerValue(timeval time_1, timeval time_2);
 
@@ -26,7 +27,7 @@ int main(int argc, char **argv)
     double **WORK_dev;
     long **IWORK;
 
-    cudaGetDeviceCount(&temp);
+    safe_cudaGetDeviceCount(&temp);
     MAX_NGPU = (long)temp;
 
     if (argc < 6 || sscanf(argv[1], "%ld", &NGPU) < 1 ||

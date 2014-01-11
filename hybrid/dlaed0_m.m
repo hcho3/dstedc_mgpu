@@ -4,7 +4,6 @@ function [Dout, Q] = dlaed0_m(NGPU, D, E)
 % We will have
 %    diag(D(in)) + diag(E, 1) + diag(E, -1) = Q * diag(D(out)) + Q'.
 
-save('input.mat', 'D', 'E');
 write_bin('D.bin', D);
 write_bin('E.bin', E);
 status = system(sprintf('./tester %d D.bin E.bin Dout.bin Q.bin', NGPU));

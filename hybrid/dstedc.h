@@ -10,7 +10,7 @@ void dlaed2(long *K, long N, long N1, double *D, double *Q, long LDQ,
     long *perm1, double *RHO, double *Z, double *DWORK, double *QWORK,
     long *perm2, long *permacc, long *perm3); 
 void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
-    double *DLAMDA, double *W, double *S, double *WORK_dev);
+    double *DLAMDA, double *W, double *WORK_dev);
 void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
     double *DLAMDA, double *W, double *S);
 __global__ void dlaed4(long K, double *D, double *Z, double RHO,

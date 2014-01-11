@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <cublas_v2.h>
 #include "dstedc.h"
+#include "nvtx.h"
+#include "safety.h"
 
 void dlaed1(long N, double *D, double *Q, long LDQ, long *perm1, double RHO,
     long CUTPNT, double *WORK, double *WORK_dev, long *IWORK)
@@ -15,6 +17,8 @@ rank-one symmetric matrix.
     and cutpnt + 1 th elements and zeros elsewhere. 
 */
 {
+    RANGE_START("dlaed1", 1, 1);
+
     long i;
     long K;
     double *Z      = &WORK[0];
@@ -30,8 +34,8 @@ rank-one symmetric matrix.
     long *permacc   = &IWORK[N];
     long *perm3     = &IWORK[2 * N];
 
-    cublasCreate(&cb_handle);
-    cublasSetPointerMode(cb_handle, CUBLAS_POINTER_MODE_HOST);
+    safe_cublasCreate(&cb_handle);
+    safe_cublasSetPointerMode(cb_handle, CUBLAS_POINTER_MODE_HOST);
 
     // form the z vector
     cblas_dcopy(CUTPNT, &Q[CUTPNT-1], LDQ, &Z[0], 1);
@@ -48,14 +52,14 @@ rank-one symmetric matrix.
     // sovle secular equation
     if (K > 0) {
         cblas_dcopy(K, D, 1, DWORK, 1);
-        dlaed3(K, D, QHAT_dev, K, RHO, DWORK, Z, QWORK, WORK_dev);
+        dlaed3(K, D, QHAT_dev, K, RHO, DWORK, Z, WORK_dev);
 
         // back-transformation
-        cublasSetMatrix(N, K, sizeof(double), Q, LDQ, WORK_dev, N);
-        cublasDgemm(cb_handle, CUBLAS_OP_N, CUBLAS_OP_N, N, K, K,
+        safe_cublasSetMatrix(N, K, sizeof(double), Q, LDQ, WORK_dev, N);
+        safe_cublasDgemm(cb_handle, CUBLAS_OP_N, CUBLAS_OP_N, N, K, K,
             &dgemm_param[0], WORK_dev, N, QHAT_dev, K, &dgemm_param[1],
             Q_dev, LDQ);
-        cublasGetMatrix(N, K, sizeof(double), Q_dev, LDQ, Q, LDQ);
+        safe_cublasGetMatrix(N, K, sizeof(double), Q_dev, LDQ, Q, LDQ);
 
         // compute perm1 that would merge back deflated values.
         dlamrg(K, N-K, D, 1, -1, perm1);
@@ -64,5 +68,7 @@ rank-one symmetric matrix.
             perm1[i] = i;
     }
 
-	cublasDestroy(cb_handle);
+	safe_cublasDestroy(cb_handle);
+
+    RANGE_END(1);
 }

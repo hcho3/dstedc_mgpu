@@ -4,6 +4,8 @@
 #include <math.h>
 #include <omp.h>
 #include "dstedc.h"
+#include "nvtx.h"
+#include "safety.h"
 
 #define SMLSIZ 128
 
@@ -14,6 +16,8 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
    We will have
       diag(D(in)) + diag(E, 1) + diag(E, -1) = Q * diag(D(out)) + Q'. */
 {
+    RANGE_START("dlaed0_m", 1, 0);
+
     long subpbs; // number of subproblems
     long i, j, k, submat, smm1, msd2, matsiz;
     long pbcap = max_matsiz_gpu(NGPU); // limit on subproblem size
@@ -100,7 +104,7 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
             // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
             // into an eigensystem of size matsiz.
             k = omp_get_thread_num();
-            cudaSetDevice(k);
+            safe_cudaSetDevice(k);
             dlaed1(matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
                 &perm1[submat], E[submat+msd2-1], msd2, WORK[k], WORK_dev[k],
                 &IWORK[k][subpbs]);
@@ -160,4 +164,6 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
         cblas_dcopy(N, &Q[i * LDQ], 1, &WORK[0][(j + 1) * N], 1);
     }
     LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, N, &WORK[0][N], N, Q, LDQ); 
+
+    RANGE_END(1);
 }
