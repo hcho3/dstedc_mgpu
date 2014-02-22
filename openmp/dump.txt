@@ -1,0 +1,621 @@
+==56768== Memcheck, a memory error detector
+==56768== Copyright (C) 2002-2011, and GNU GPL'd, by Julian Seward et al.
+==56768== Using Valgrind-3.7.0 and LibVEX; rerun with -h for copyright info
+==56768== Command: ./tester 20 20 D_8192.bin E_8192.bin Dout.bin Q.bin
+==56768== 
+==56768== Warning: set address range perms: large range [0x75fe040, 0x275fe040) (undefined)
+==56768== Warning: set address range perms: large range [0x3959d040, 0x795bd040) (undefined)
+==56768== Warning: set address range perms: large range [0x795be040, 0x995de040) (undefined)
+==56768== Warning: set address range perms: large range [0x995df040, 0xb95ff040) (undefined)
+==56768== Warning: set address range perms: large range [0xb9600040, 0xd9620040) (undefined)
+==56768== Warning: set address range perms: large range [0xd9621040, 0xf9641040) (undefined)
+==56768== Warning: set address range perms: large range [0xf9642040, 0x119662040) (undefined)
+==56768== Warning: set address range perms: large range [0x119663040, 0x139683040) (undefined)
+==56768== Warning: set address range perms: large range [0x139684040, 0x1596a4040) (undefined)
+==56768== Warning: set address range perms: large range [0x1596a5040, 0x1796c5040) (undefined)
+==56768== Warning: set address range perms: large range [0x1796c6040, 0x1996e6040) (undefined)
+==56768== Warning: set address range perms: large range [0x1996e7040, 0x1b9707040) (undefined)
+==56768== Warning: set address range perms: large range [0x1b9708040, 0x1d9728040) (undefined)
+==56768== Warning: set address range perms: large range [0x1d9729040, 0x1f9749040) (undefined)
+==56768== Warning: set address range perms: large range [0x1f974a040, 0x21976a040) (undefined)
+==56768== Warning: set address range perms: large range [0x21976b040, 0x23978b040) (undefined)
+==56768== Warning: set address range perms: large range [0x23978c040, 0x2597ac040) (undefined)
+==56768== Warning: set address range perms: large range [0x2597ad040, 0x2797cd040) (undefined)
+==56768== Warning: set address range perms: large range [0x2797ce040, 0x2997ee040) (undefined)
+==56768== Warning: set address range perms: large range [0x2997ef040, 0x2b980f040) (undefined)
+==56768== Warning: set address range perms: large range [0x2b9810040, 0x2d9830040) (undefined)
+==56768== Thread 6:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x406E56: LAPACKE_dge_nancheck (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x406889: LAPACKE_dlacpy (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4036E5: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x406E6C: LAPACKE_dge_nancheck (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x406889: LAPACKE_dlacpy (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4036E5: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 1:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x406E56: LAPACKE_dge_nancheck (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x406889: LAPACKE_dlacpy (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402661: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x406E6C: LAPACKE_dge_nancheck (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x406889: LAPACKE_dlacpy (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402661: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Thread 4:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B5AA63: dgemm_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B1F04D: cblas_dgemm (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x402982: dlaed1._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4025B8: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B5ABC4: dgemm_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B1F04D: cblas_dgemm (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x402982: dlaed1._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4025B8: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 12:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B25B28: cblas_idamax (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x402D4F: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Use of uninitialised value of size 8
+==56768==    at 0x402D88: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD4924: fmax (s_fmax.S:26)
+==56768==    by 0x402DC2: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Use of uninitialised value of size 8
+==56768==    at 0x402DEF: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x402E0C: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x403003: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD4924: fmax (s_fmax.S:26)
+==56768==    by 0x4044D8: dlapy2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4030F3: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD4944: fmin (s_fmin.S:26)
+==56768==    by 0x404504: dlapy2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4030F3: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x40451B: dlapy2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4030F3: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x404526: dlapy2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4030F3: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x40455E: dlapy2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4030F3: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x403179: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x403473: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 1:
+==56768== Use of uninitialised value of size 8
+==56768==    at 0x402D88: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Use of uninitialised value of size 8
+==56768==    at 0x402DEF: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x402E0C: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x403003: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x403179: dlaed2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x402321: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40180A: dlaed0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404B3E: main (in /home/hcho3/dstedc/openmp/tester)
+==56768== 
+==56768== Thread 10:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x405148: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x405326: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x4053BC: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD4944: fmin (s_fmin.S:26)
+==56768==    by 0x4041E5: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x40623C: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x4062C9: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x4062F6: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x40630A: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x4042D5: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x406266: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 8:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x405350: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 3:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x405505: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x405880: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x405913: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x4066C6: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x406753: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x40678C: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x4067B0: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x403C66: dlaed3._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403904: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 8:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x4066F0: middle_way (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x404298: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 5:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5DD48A8: sqrt (w_sqrt.c:28)
+==56768==    by 0x4058AA: initial_guess (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x40414C: dlaed4 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403AD0: dlaed3._omp_fn.0 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x403869: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Thread 3:
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B5C346: dnrm2_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B5C3CA: dnrm2sub_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B1FA3F: cblas_dnrm2 (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x403F8D: dlaed3._omp_fn.2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4039B7: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B5C34C: dnrm2_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B5C3CA: dnrm2sub_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B1FA3F: cblas_dnrm2 (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x403F8D: dlaed3._omp_fn.2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4039B7: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B5C356: dnrm2_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B5C3CA: dnrm2sub_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B1FA3F: cblas_dnrm2 (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x403F8D: dlaed3._omp_fn.2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4039B7: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== Conditional jump or move depends on uninitialised value(s)
+==56768==    at 0x5B5C373: dnrm2_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B5C3CA: dnrm2sub_ (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x5B1FA3F: cblas_dnrm2 (in /usr/lib/libblas/libblas.so.3.0)
+==56768==    by 0x403F8D: dlaed3._omp_fn.2 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4039B7: dlaed3 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x4023B4: dlaed1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x401F81: dlaed0._omp_fn.1 (in /home/hcho3/dstedc/openmp/tester)
+==56768==    by 0x60B2819: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==56768==    by 0x62C0E99: start_thread (pthread_create.c:308)
+==56768==    by 0x65CA3FC: clone (clone.S:112)
+==56768== 
+==56768== 
+==56768== More than 10000000 total errors detected.  I'm not reporting any more.
+==56768== Final error counts will be inaccurate.  Go fix your program!
+==56768== Rerun with --error-limit=no to disable this cutoff.  Note
+==56768== that errors may occur in your program without prior warning from
+==56768== Valgrind, because errors are no longer being displayed.
+==56768== 
+NGRP = 20
+NCORE = 20
+MAX_NCORE = 24
+maxN = 17925
+WORK[0] = malloc(134234112 * sizeof(double) )
+WORK[0][657920]
+WORK[0][2236928]
+WORK[0][1842176]
+WORK[0][394752]
+WORK[0][1579008]
+WORK[0][131584]
+WORK[0][1052672]
+WORK[0][0]
+WORK[0][1710592]
+WORK[0][1184256]
+WORK[0][2500096]
+WORK[0][526336]
+WORK[0][263168]
+WORK[0][1315840]
+WORK[0][1973760]
+WORK[0][789504]
+WORK[0][1447424]
+WORK[0][2368512]
+WORK[0][921088]
+WORK[0][2105344]
+WORK[0][0]
+WORK[0][657920]
+WORK[0][131584]
+WORK[0][1184256]
+WORK[0][1052672]
+WORK[0][394752]
+WORK[0][921088]
+WORK[0][1315840]
+WORK[0][1447424]
+WORK[0][526336]
+WORK[0][263168]
+WORK[0][789504]
+cost per subproblem = 0.435 s, pbmax = 256
+WORK[0][5778432]
+WORK[0][1050624]
+WORK[0][2101248]
+WORK[0][3677184]
+WORK[0][4727808]
+WORK[0][6829056]
+WORK[0][3151872]
+WORK[0][4202496]
+WORK[0][5253120]
+WORK[0][525312]
+WORK[0][7879680]
+WORK[0][6303744]
+WORK[0][2626560]
+WORK[0][0]
+WORK[0][1575936]
+WORK[0][7354368]
+cost per subproblem = 2.630 s, pbmax = 512
+WORK[0][0]
+WORK[0][4198400]
+WORK[0][10496000]
+WORK[0][2099200]
+WORK[0][6297600]
+WORK[0][12595200]
+WORK[0][14694400]
+WORK[0][8396800]
+cost per subproblem = 17.819 s, pbmax = 1024
+WORK[0][8392704]
+WORK[0][0]
+WORK[0][16785408]
+WORK[0][25178112]
+cost per subproblem = 129.648 s, pbmax = 2048
+WORK[0][0]
+WORK[0][33562624]
+==56768== 
+==56768== HEAP SUMMARY:
+==56768==     in use at exit: 11,820,510,745 bytes in 110 blocks
+==56768==   total heap usage: 587 allocs, 477 frees, 11,820,990,605 bytes allocated
+==56768== 
+==56768== LEAK SUMMARY:
+==56768==    definitely lost: 0 bytes in 0 blocks
+==56768==    indirectly lost: 0 bytes in 0 blocks
+==56768==      possibly lost: 10,656 bytes in 37 blocks
+==56768==    still reachable: 11,820,500,089 bytes in 73 blocks
+==56768==         suppressed: 0 bytes in 0 blocks
+==56768== Rerun with --leak-check=full to see details of leaked memory
+==56768== 
+==56768== For counts of detected and suppressed errors, rerun with: -v
+==56768== Use --track-origins=yes to see where uninitialised values come from
+==56768== ERROR SUMMARY: 10000000 errors from 49 contexts (suppressed: 2 from 2)

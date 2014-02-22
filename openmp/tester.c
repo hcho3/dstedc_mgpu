@@ -1,19 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
 #include "dstedc.h"
-#include "safety.h"
 #include "timer.h"
 
 int main(int argc, char **argv)
 {
-    int temp;
-    long NGPU, MAX_NGPU;
-    const char *Din  = argv[2];
-    const char *Ein  = argv[3];
-    const char *Dout = argv[4];
-    const char *Qout = argv[5];
-	timeval timer1, timer2;
+    long NGRP, NCORE, MAX_NCORE;
+    // NGRP: # of compute groups
+    // NCORE: total # of cores to use; compute groups will get fair shares.
+    // MAX_NCORE: maximum # of cores
+    const char *Din  = argv[3];
+    const char *Ein  = argv[4];
+    const char *Dout = argv[5];
+    const char *Qout = argv[6];
+	struct timeval timer1, timer2;
     
     long D_dims[2], E_dims[2], Q_dims[2];
     double *D;
@@ -21,17 +23,23 @@ int main(int argc, char **argv)
     double *Q;
     long N;
     double *WORK;
-    double **WORK_dev;
     long *IWORK;
 
-    safe_cudaGetDeviceCount(&temp);
-    MAX_NGPU = (long)temp;
+    MAX_NCORE = omp_get_num_procs();
+    omp_set_nested(1);
 
-    if (argc < 6 || sscanf(argv[1], "%ld", &NGPU) < 1 ||
-        NGPU <= 0 || NGPU > MAX_NGPU) {
-        printf("Usage: %s [# of GPUs] [Din.bin] [E.bin] [Dout.bin] [Q.bin]\n",
-            argv[0]);
-        printf("The number of GPUs must be between 1 and %ld.\n", MAX_NGPU);
+    if (argc < 7 ||
+        sscanf(argv[1], "%ld", &NGRP) < 1 || NGRP <= 0 ||
+        sscanf(argv[2], "%ld", &NCORE) < 1 || NCORE <= 0 ||
+        NCORE > MAX_NCORE || NGRP > NCORE) {
+        printf("Usage: %s "
+               "[# of compute groups] [total # of cores to use] "
+               "[Din.bin] [E.bin] [Dout.bin] [Q.bin]\n", argv[0]);
+        printf("This system has %ld CPU cores that can run in parallel.\n",
+               MAX_NCORE);
+        printf("Each compute group gets an equal share of available codes.\n");
+        printf("So the number of compute groups should not exceed that of "
+               "cores assigned.\n");
         printf("[Din.bin]: file containing the diagonal of the input "
                "tridiagonal matrix.\n");
         printf("[Ein.bin]: file containing the subdiagonal of the input "
@@ -43,7 +51,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    printf("NGPU = %ld\n", NGPU);
+    printf("NGRP = %ld\n", NGRP);
+    printf("NCORE = %ld\n", NCORE);
+    printf("MAX_NCORE = %ld\n", MAX_NCORE);
     D = read_mat(Din, D_dims);
     E = read_mat(Ein, E_dims);
     N = (D_dims[0] > D_dims[1]) ? D_dims[0] : D_dims[1];
@@ -52,11 +62,10 @@ int main(int argc, char **argv)
     Q = (double *)malloc(N * N * sizeof(double));
 
     WORK = allocate_work(N);
-    WORK_dev = allocate_work_dev(NGPU, N);
     IWORK = allocate_iwork(N);
 
     get_time(&timer1);
-    dlaed0_m(NGPU, N, D, E, Q, N, WORK, WORK_dev, IWORK);
+    dlaed0_m(NGRP, NCORE, N, D, E, Q, N, WORK, IWORK);
     get_time(&timer2);
     printf("Time: %.3lf s\n", get_elapsed_ms(timer1, timer2) / 1000.0 );
 
@@ -67,7 +76,6 @@ int main(int argc, char **argv)
     free(D);
     free(E);
     free_work(WORK);
-    free_work_dev(WORK_dev, NGPU);
     free_iwork(IWORK);
 
     return 0;

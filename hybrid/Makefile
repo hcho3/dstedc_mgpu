@@ -18,7 +18,7 @@ TPB=128
 
 tester: dlaed0_m.o dlaed1.o dlaed1_ph2.o dlaed2.o dlaed3.o dlaed3_ph2.o  \
 		dlaed4.o dlaed4_ph2.o dlamrg.o dlapy2.o matio.o tester.o workspace.o \
-		safety.o
+		safety.o timer.o
 	nvcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) $(CUDA)
 
 dlaed0_m.o: dlaed0_m.cu
@@ -49,6 +49,8 @@ workspace.o: workspace.cu
 	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUDA)
 safety.o: safety.cu
 	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUBLAS)
+timer.o: timer.cu
+	nvcc $(DEBUG) -c $< -o $@
 
 clean:
 	rm -fv tester *.o

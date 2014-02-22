@@ -26,7 +26,7 @@ rank-one symmetric matrix.
 
     // largest submatrices that fit into main memory and GPU memory
     long pbcap_gpu  = max_matsiz_gpu(NGPU);
-    long pbcap_host = max_matsiz_host(NGPU); 
+    long pbcap_host = max_matsiz_host(); 
     long pardim = (long)ceil(((double)pbcap_host / pbcap_gpu) / NGPU) * NGPU;
 
     long K; // number of non-deflated eigenvalues

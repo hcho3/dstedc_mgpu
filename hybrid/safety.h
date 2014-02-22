@@ -5,8 +5,8 @@
     _cuda_check(cudaMemcpy(__VA_ARGS__), __LINE__)
 #define safe_cudaMalloc(...) \
     _cuda_check(cudaMalloc(__VA_ARGS__), __LINE__)
-#define safe_cudaMallocHost(...) \
-    _cuda_check(cudaMallocHost(__VA_ARGS__), __LINE__)
+#define safe_cudaHostAlloc(...) \
+    _cuda_check(cudaHostAlloc(__VA_ARGS__), __LINE__)
 #define safe_cudaDeviceSynchronize(...) \
     _cuda_check(cudaDeviceSynchronize(__VA_ARGS__), __LINE__)
 #define safe_cudaGetDeviceCount(...) \

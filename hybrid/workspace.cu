@@ -16,7 +16,7 @@ long max_matsiz_gpu(long NGPU)
 
     for (i = 0; i < NGPU; i++) {
         safe_cudaGetDeviceProperties(&cdp, i);
-        if (cdp.totalGlobalMem < min || min < 0L)
+        if ((long)cdp.totalGlobalMem < min || min < 0L)
             min = cdp.totalGlobalMem;
     }
 
@@ -26,7 +26,7 @@ long max_matsiz_gpu(long NGPU)
     return max_matsiz_gpu;
 }
 
-long max_matsiz_host(long NGPU)
+long max_matsiz_host(void)
 {
     long num_pages = sysconf( _SC_PHYS_PAGES );
     long page_size = sysconf( _SC_PAGESIZE ); 
@@ -34,18 +34,17 @@ long max_matsiz_host(long NGPU)
     long max_matsiz_host;
 
     max_matsiz_host
-        = (long)floor(
-            (sqrt(52.0*NGPU*NGPU+(0.4*host_mem-12)*NGPU+0.4*host_mem)-8.0*NGPU)
-            / (2.0*(NGPU+1))); 
+        = (long)floor((-7.0 + sqrt(49.0 + 0.8 * host_mem)) / 4.0);
 
     return max_matsiz_host;
 }
 
-double **allocate_work(long NGPU, long N)
+double *allocate_work(long N)
 {
-    double **WORK;
-    long i;
-    long maxN = max_matsiz_host(NGPU);
+    double *WORK;
+    long maxN = max_matsiz_host();
+
+    printf("maxN = %ld\n", maxN);
 
     if (N > maxN) {
         printf("The input matrix is too big!\n"
@@ -53,16 +52,8 @@ double **allocate_work(long NGPU, long N)
         exit(1);
     }
 
-    WORK = (double **)malloc(NGPU * sizeof(double *));
-
-    safe_cudaSetDevice(0);
-    safe_cudaMallocHost((void **)&WORK[0],
-        (2*N + 2*N*N) * sizeof(double));
-    for (i = 1; i < NGPU; i++) {
-        safe_cudaSetDevice(i);
-        safe_cudaMallocHost((void **)&WORK[i],
-            (2*N + N*N) * sizeof(double));
-    }
+    safe_cudaHostAlloc((void **)&WORK,
+        (2*N + 2*N*N) * sizeof(double), cudaHostAllocPortable);
 
     return WORK;
 }
@@ -86,30 +77,18 @@ double **allocate_work_dev(long NGPU, long N)
     return WORK_dev;
 }
 
-long **allocate_iwork(long NGPU, long N)
+long *allocate_iwork(long N)
 {
-    long **IWORK;
-    long i;
-
-    IWORK = (long **)malloc(NGPU * sizeof(long *));
-    for (i = 0; i < NGPU; i++) {
-        safe_cudaSetDevice(i);
-        safe_cudaMallocHost((void **)&IWORK[i], (3 + 5*N) * sizeof(long));
-    }
+    long *IWORK;
+    safe_cudaHostAlloc((void **)&IWORK, (5*N) * sizeof(long),
+        cudaHostAllocPortable);
 
     return IWORK;
 }
 
-void free_work(double **WORK, long NGPU)
+void free_work(double *WORK)
 {
-    long i;
-
-    for (i = 0; i < NGPU; i++) {
-        safe_cudaSetDevice(i);
-        safe_cudaFreeHost(WORK[i]);
-    }
-
-    free(WORK);
+    safe_cudaFreeHost(WORK);
 }
 
 void free_work_dev(double **WORK_dev, long NGPU)
@@ -124,14 +103,7 @@ void free_work_dev(double **WORK_dev, long NGPU)
     free(WORK_dev);
 }
 
-void free_iwork(long **IWORK, long NGPU)
+void free_iwork(long *IWORK)
 {
-    long i;
-
-    for (i = 0; i < NGPU; i++) {
-        safe_cudaSetDevice(i);
-        safe_cudaFreeHost(IWORK[i]);
-    }
-
-    free(IWORK);
+    safe_cudaFreeHost(IWORK);
 }

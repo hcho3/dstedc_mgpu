@@ -4,27 +4,24 @@
 #include <math.h>
 #include <omp.h>
 #include "dstedc.h"
-#include "nvtx.h"
-#include "safety.h"
 #include "timer.h"
 
 #define SMLSIZ 128
 
-void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
-    double *WORK, double **WORK_dev, long *IWORK)
+void dlaed0_m(long NGRP, long NCORE, long N, double *D, double *E, double *Q,
+    long LDQ, double *WORK, long *IWORK)
 /* computes all eigenvalues and corresponding eigenvectors of a symmetric
    tridiagonal matrix using the divide-and-conquer eigenvalue algorithm.
    We will have
       diag(D(in)) + diag(E, 1) + diag(E, -1) = Q * diag(D(out)) + Q'. */
 {
-    RANGE_START("dlaed0_m", 1, 0);
-
     long subpbs; // number of subproblems
     long i, j, k, submat, smm1, msd2, matsiz;
-    long pbcap = max_matsiz_gpu(NGPU); // limit on subproblem size
-    long pbmax; // largest subproblem seen so far
     long *partition = &IWORK[0];
     long *perm1 = &IWORK[4*N];
+
+    long pbmax;
+    long NCOREP; // # cores allocated to each compute group
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
@@ -75,10 +72,9 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
     // eigensystem for the corresponding larger matrix.
     pbmax = 0;
     
-    /* Phase 1: Fine-grained, in-core */
-    timeval timer1, timer2;
+    struct timeval timer1, timer2;
 
-    omp_set_num_threads(NGPU);
+    omp_set_num_threads(NGRP);
     while (subpbs > 1) {
         // update pbmax.
         for (j = 0; j < subpbs/2; j++) {
@@ -87,14 +83,12 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
             if (matsiz > pbmax)
                 pbmax = matsiz;
         }
-        if (pbmax > pbcap)
-            break;
 
         get_time(&timer1);
         #pragma omp parallel for default(none) \
-            private(i, j, k, submat, matsiz, msd2) \
-            firstprivate(N, subpbs, LDQ) \
-            shared(partition, D, Q, perm1, E, WORK, IWORK, WORK_dev)
+            private(i, j, submat, matsiz, msd2, NCOREP) \
+            firstprivate(N, subpbs, LDQ, NGRP, NCORE) \
+            shared(partition, D, Q, perm1, E, WORK, IWORK)
         for (j = 0; j < subpbs/2; j++) {
             i = 2*j - 1;
             if (i == -1) {
@@ -106,58 +100,14 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
                 matsiz = partition[i+2] - partition[i];
                 msd2 = matsiz / 2;
             }
-
             // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
             // into an eigensystem of size matsiz.
-            k = omp_get_thread_num();
-            safe_cudaSetDevice(k);
-            dlaed1(matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
+            NCOREP = NCORE / ((subpbs/2 >= NGRP) ? NGRP : (subpbs/2));
+            dlaed1(NCOREP, matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
                 &perm1[submat], E[submat+msd2-1], msd2,
-                &WORK[submat*(2*N+2*N*N)/N],
-                WORK_dev[k], &IWORK[subpbs+3*submat]);
+                &WORK[submat*(2*N+2*N*N)/N], &IWORK[subpbs+3*submat]);
         }
         get_time(&timer2);
-
-        printf("cost per subproblem = %.3lf s, pbmax = %ld\n", 
-            get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs, pbmax);
-
-        // update partition.
-        for (i = -1; i < subpbs - 2; i += 2)
-            partition[(i-1)/2 + 1] = partition[i+2];
-        subpbs /= 2;
-    }
-
-    /* Phase 2: Coarse-grained, out-of-core */
-    while (subpbs > 1) {
-        // update pbmax.
-        for (j = 0; j < subpbs/2; j++) {
-            i = 2*j - 1;
-            matsiz = (i == -1) ? partition[1] : partition[i+2]-partition[i];
-            if (matsiz > pbmax)
-                pbmax = matsiz;
-        }
-
-        get_time(&timer1);
-        for (j = 0; j < subpbs/2; j++) {
-            i = 2*j - 1;
-            if (i == -1) {
-                submat = 0;
-                matsiz = partition[1];
-                msd2 = partition[0];
-            } else {
-                submat = partition[i];
-                matsiz = partition[i+2] - partition[i];
-                msd2 = matsiz / 2;
-            }
-
-            // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
-            // into an eigensystem of size matsiz.
-            dlaed1_ph2(NGPU, matsiz, &D[submat], &Q[submat + submat * LDQ],
-                LDQ, &perm1[submat], E[submat+msd2-1], msd2, WORK, WORK_dev,
-                &IWORK[subpbs]);
-        }
-        get_time(&timer2);
-
         printf("cost per subproblem = %.3lf s, pbmax = %ld\n", 
             get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs, pbmax);
 
@@ -180,6 +130,4 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
         cblas_dcopy(N, &Q[i * LDQ], 1, &WORK[(j + 1) * N], 1);
     }
     LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, N, &WORK[N], N, Q, LDQ); 
-
-    RANGE_END(1);
 }
