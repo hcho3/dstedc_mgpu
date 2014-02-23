@@ -1,4 +1,4 @@
-all: tester
+all: gpuprof
 
 USE_NVTX=-DUSE_NVTX
 SAFE_CUBLAS=-DSAFE_CUBLAS
@@ -16,10 +16,11 @@ CUDA=-L$(CUDA_PATH) -lcublas -lcudadevrt -lnvToolsExt
 
 TPB=128
 
-tester: dlaed0_m.o dlaed1.o dlaed1_ph2.o dlaed2.o dlaed3.o dlaed3_ph2.o  \
-		dlaed4.o dlaed4_ph2.o dlamrg.o dlapy2.o matio.o tester.o workspace.o \
+gpuprof: dlaed0_m.o dlaed1.o dlaed1_ph2.o dlaed2.o dlaed3.o dlaed3_ph2.o  \
+		dlaed4.o dlaed4_ph2.o dlamrg.o dlapy2.o matio.o main.o workspace.o \
 		safety.o timer.o
 	nvcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) $(CUDA)
+	mv $@ ..
 
 dlaed0_m.o: dlaed0_m.cu
 	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUDA)
@@ -43,7 +44,7 @@ dlapy2.o: dlapy2.cu
 	nvcc $(DEBUG) -c $< -o $@
 matio.o: matio.cu
 	nvcc $(DEBUG) -c $< -o $@
-tester.o: tester.cu
+main.o: main.cu
 	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUDA)
 workspace.o: workspace.cu
 	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUDA)
@@ -53,4 +54,4 @@ timer.o: timer.cu
 	nvcc $(DEBUG) -c $< -o $@
 
 clean:
-	rm -fv tester *.o
+	rm -fv ../gpuprof *.o

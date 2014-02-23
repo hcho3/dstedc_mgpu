@@ -37,7 +37,7 @@ int main(int argc, char **argv)
                "[Din.bin] [E.bin] [Dout.bin] [Q.bin]\n", argv[0]);
         printf("This system has %ld CPU cores that can run in parallel.\n",
                MAX_NCORE);
-        printf("Each compute group gets an equal share of available codes.\n");
+        printf("Each compute group gets an equal share of available cores.\n");
         printf("So the number of compute groups should not exceed that of "
                "cores assigned.\n");
         printf("[Din.bin]: file containing the diagonal of the input "

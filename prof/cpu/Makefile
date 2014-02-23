@@ -1,4 +1,4 @@
-all: tester
+all: cpuprof
 
 DEBUG=-O3 -Wall -Wextra -pedantic -fopenmp -std=gnu99
 
@@ -9,10 +9,11 @@ ATLAS=-L$(ATLAS_PATH) -llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm
 
 TPB=128
 
-tester: dlaed0_m.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o  \
-		dlamrg.o dlapy2.o matio.o tester.o workspace.o \
+cpuprof: dlaed0_m.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o  \
+		dlamrg.o dlapy2.o matio.o main.o workspace.o \
 		timer.o initial_guess.o middle_way.o
 	gcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) -lm
+	mv $@ ..
 
 dlaed0_m.o: dlaed0_m.c
 	gcc $(DEBUG) -c $< -o $@
@@ -34,7 +35,7 @@ dlapy2.o: dlapy2.c
 	gcc $(DEBUG) -c $< -o $@
 matio.o: matio.c
 	gcc $(DEBUG) -c $< -o $@
-tester.o: tester.c
+main.o: main.c
 	gcc $(DEBUG) -c $< -o $@
 workspace.o: workspace.c
 	gcc $(DEBUG) -c $< -o $@
@@ -42,4 +43,4 @@ timer.o: timer.c
 	gcc $(DEBUG) -c $< -o $@
 
 clean:
-	rm -fv tester *.o
+	rm -fv ../cpuprof *.o
