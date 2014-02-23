@@ -1,8 +1,8 @@
 dstedx_test
 *.o
 tester
-prof/cpuprof
-prof/gpuprof
+prof/cpu/cpuprof
+prof/gpu/gpuprof
 dstevd_c
 dstedc_c
 *.mat

@@ -24,7 +24,6 @@ OBJ=$(patsubst %,$(OBJDIR)/%,$(_OBJ))
 
 gpuprof: $(OBJ)
 	nvcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) $(CUDA)
-	mv $@ ..
 
 $(OBJDIR)/%.o: %.cu
 	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUDA) $(SAFE_CUBLAS) -DTPB=$(TPB)
@@ -32,4 +31,4 @@ $(OBJDIR)/matio.o: ../../matio/matio.c
 	g++ -O3 -Wall -Wextra -c $< -o $@
 
 clean:
-	rm -fv ../gpuprof $(OBJDIR)/*.o
+	rm -fv gpuprof $(OBJDIR)/*.o

@@ -17,7 +17,6 @@ OBJ=$(patsubst %,$(OBJDIR)/%,$(_OBJ))
 
 cpuprof: $(OBJ)
 	gcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) -lm
-	mv $@ ..
 
 $(OBJDIR)/%.o: %.c
 	gcc $(DEBUG) -c $< -o $@
@@ -25,4 +24,4 @@ $(OBJDIR)/matio.o: ../../matio/matio.c
 	gcc $(DEBUG) -c $< -o $@
 
 clean:
-	rm -fv ../cpuprof $(OBJDIR)/*.o
+	rm -fv cpuprof $(OBJDIR)/*.o
