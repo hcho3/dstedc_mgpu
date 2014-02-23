@@ -13,12 +13,12 @@ void _cuda_check(cudaError_t cs, long line)
         exit(1);
     }
 }
-void _cublas_check(cublasStatus_t cs, long line)
+void _cublas_check(int cs, long line)
 {
     const char *errstr;
 
-    if (cs != CUBLAS_STATUS_SUCCESS) {
-        switch(cs) {
+    if ((cublasStatus_t)cs != CUBLAS_STATUS_SUCCESS) {
+        switch((cublasStatus_t)cs) {
             case CUBLAS_STATUS_SUCCESS:
                 errstr = "CUBLAS_STATUS_SUCCESS"; break;
             case CUBLAS_STATUS_NOT_INITIALIZED:

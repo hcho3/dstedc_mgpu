@@ -54,7 +54,7 @@ void _cuda_check(cudaError_t cs, long line);
     _cublas_check(cublasGetMatrix(__VA_ARGS__), __LINE__)
 #define safe_cublasDgemm(...) \
     _cublas_check(cublasDgemm(__VA_ARGS__), __LINE__)
-void _cublas_check(cublasStatus_t cs, long line);
+void _cublas_check(int cs, long line);
 
 #else
 #define safe_cublasCreate(...) \

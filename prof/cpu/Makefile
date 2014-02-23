@@ -1,6 +1,7 @@
 all: cpuprof
 
 DEBUG=-O3 -Wall -Wextra -pedantic -fopenmp -std=gnu99
+OBJDIR=obj
 
 ATLAS_PATH=/usr/local/atlas3.10.1/lib/
 
@@ -9,38 +10,19 @@ ATLAS=-L$(ATLAS_PATH) -llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm
 
 TPB=128
 
-cpuprof: dlaed0_m.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o  \
+_OBJ= dlaed0_m.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o  \
 		dlamrg.o dlapy2.o matio.o main.o workspace.o \
 		timer.o initial_guess.o middle_way.o
+OBJ=$(patsubst %,$(OBJDIR)/%,$(_OBJ))
+
+cpuprof: $(OBJ)
 	gcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) -lm
 	mv $@ ..
 
-dlaed0_m.o: dlaed0_m.c
+$(OBJDIR)/%.o: %.c
 	gcc $(DEBUG) -c $< -o $@
-dlaed1.o: dlaed1.c
-	gcc $(DEBUG) -c $< -o $@
-dlaed2.o: dlaed2.c
-	gcc $(DEBUG) -c $< -o $@
-dlaed3.o: dlaed3.c
-	gcc $(DEBUG) -c $< -o $@
-dlaed4.o: dlaed4.c
-	gcc $(DEBUG) -c $< -o $@
-initial_guess.o: initial_guess.c
-	gcc $(DEBUG) -c $< -o $@
-middle_way.o: middle_way.c
-	gcc $(DEBUG) -c $< -o $@
-dlamrg.o: dlamrg.c
-	gcc $(DEBUG) -c $< -o $@
-dlapy2.o: dlapy2.c
-	gcc $(DEBUG) -c $< -o $@
-matio.o: matio.c
-	gcc $(DEBUG) -c $< -o $@
-main.o: main.c
-	gcc $(DEBUG) -c $< -o $@
-workspace.o: workspace.c
-	gcc $(DEBUG) -c $< -o $@
-timer.o: timer.c
+$(OBJDIR)/matio.o: ../../matio/matio.c
 	gcc $(DEBUG) -c $< -o $@
 
 clean:
-	rm -fv ../cpuprof *.o
+	rm -fv ../cpuprof $(OBJDIR)/*.o
