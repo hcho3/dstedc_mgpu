@@ -24,6 +24,7 @@ int main(int argc, char **argv)
     long N;
     double *WORK;
     long *IWORK;
+    int quiet = 0;
 
     MAX_NCORE = omp_get_num_procs();
     omp_set_nested(1);
@@ -51,9 +52,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    printf("NGRP = %ld\n", NGRP);
-    printf("NCORE = %ld\n", NCORE);
-    printf("MAX_NCORE = %ld\n", MAX_NCORE);
+    if (argc == 8 && strcmp(argv[7], "quiet") == 0)
+        quiet = 1;
+
+    //fprintf(stderr, "NGRP = %ld\n", NGRP);
+    fprintf(stderr, "# of CPU cores = %ld\n", NCORE);
+    //fprintf(stderr, "MAX_NCORE = %ld\n", MAX_NCORE);
     D = read_mat(Din, D_dims);
     E = read_mat(Ein, E_dims);
     N = (D_dims[0] > D_dims[1]) ? D_dims[0] : D_dims[1];
@@ -67,10 +71,12 @@ int main(int argc, char **argv)
     get_time(&timer1);
     dlaed0_m(NGRP, NCORE, N, D, E, Q, N, WORK, IWORK);
     get_time(&timer2);
-    printf("Time: %.3lf s\n", get_elapsed_ms(timer1, timer2) / 1000.0 );
+    //printf("Time: %.3lf s\n", get_elapsed_ms(timer1, timer2) / 1000.0 );
 
-    write_mat(Dout, D, D_dims);
-    write_mat(Qout, Q, Q_dims);
+    if (!quiet) {
+        write_mat(Dout, D, D_dims);
+        write_mat(Qout, Q, Q_dims);
+    }
 
     free(Q);
     free(D);

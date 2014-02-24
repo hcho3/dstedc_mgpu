@@ -44,8 +44,6 @@ double *allocate_work(long N)
     double *WORK;
     long maxN = max_matsiz_host();
 
-    printf("maxN = %ld\n", maxN);
-
     if (N > maxN) {
         printf("The input matrix is too big!\n"
                "The main memory will hold only %ldx%ld\n", maxN, maxN);

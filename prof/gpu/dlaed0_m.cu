@@ -25,6 +25,7 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
     long pbmax; // largest subproblem seen so far
     long *partition = &IWORK[0];
     long *perm1 = &IWORK[4*N];
+    double tmp;
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
@@ -117,9 +118,12 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
                 WORK_dev[k], &IWORK[subpbs+3*submat]);
         }
         get_time(&timer2);
-
-        printf("cost per subproblem = %.3lf s, pbmax = %ld\n", 
-            get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs, pbmax);
+        tmp = get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs;
+        printf("%ld:%ld:%.20lf\n",
+            pbmax, (NGPU <= subpbs/2) ? NGPU : subpbs/2, tmp);
+        fprintf(stderr,
+            "    subproblem size = %ld, cost per subproblem = %.3lf s\n",
+            pbmax, tmp);
 
         // update partition.
         for (i = -1; i < subpbs - 2; i += 2)
@@ -157,9 +161,6 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
                 &IWORK[subpbs]);
         }
         get_time(&timer2);
-
-        printf("cost per subproblem = %.3lf s, pbmax = %ld\n", 
-            get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs, pbmax);
 
         // update partition.
         for (i = -1; i < subpbs - 2; i += 2)

@@ -23,6 +23,7 @@ int main(int argc, char **argv)
     double *WORK;
     double **WORK_dev;
     long *IWORK;
+    int quiet = 0;
 
     safe_cudaGetDeviceCount(&temp);
     MAX_NGPU = (long)temp;
@@ -43,7 +44,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    printf("NGPU = %ld\n", NGPU);
+    if (argc == 7 && strcmp(argv[6], "quiet") == 0)
+        quiet = 1;
+    fprintf(stderr, "# of GPUs = %ld\n", NGPU);
     D = read_mat(Din, D_dims);
     E = read_mat(Ein, E_dims);
     N = (D_dims[0] > D_dims[1]) ? D_dims[0] : D_dims[1];
@@ -58,10 +61,12 @@ int main(int argc, char **argv)
     get_time(&timer1);
     dlaed0_m(NGPU, N, D, E, Q, N, WORK, WORK_dev, IWORK);
     get_time(&timer2);
-    printf("Time: %.3lf s\n", get_elapsed_ms(timer1, timer2) / 1000.0 );
+    //printf("Time: %.3lf s\n", get_elapsed_ms(timer1, timer2) / 1000.0 );
 
-    write_mat(Dout, D, D_dims);
-    write_mat(Qout, Q, Q_dims);
+    if (!quiet) {
+        write_mat(Dout, D, D_dims);
+        write_mat(Qout, Q, Q_dims);
+    }
 
     free(Q);
     free(D);
