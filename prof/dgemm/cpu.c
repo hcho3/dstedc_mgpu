@@ -18,6 +18,7 @@ int main(int argc, char **argv)
     double *A, *B, *C;
     long A_dims[2], B_dims[2], C_dims[2];
     long M, N, K;
+    double tmp;
     struct timeval timer1, timer2;
 
     if (argc < 4) {
@@ -53,10 +54,10 @@ int main(int argc, char **argv)
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1.0, 
         A, K, B, N, 0.0, C, N);
     get_time(&timer2);
-    printf("%ld:%.20lf\n", M,
-        get_elapsed_ms(timer1, timer2) / 1000.0);
+    tmp = get_elapsed_ms(timer1, timer2);
+    printf("%ld:%.20lf\n", M, tmp / 1000.0);
     fprintf(stderr, "Multiplying %ld-by-%ld matrix by %ld-by-%ld matrix: "
-        "%.20lf s\n", M, K, K, N, get_elapsed_ms(timer1, timer2) / 1000.0);
+        "%.3lf s\n", M, K, K, N, tmp / 1000.0);
 
     if (!quiet)
         write_mat(fC, C, C_dims);

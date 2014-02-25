@@ -18,6 +18,7 @@ int main(int argc, char **argv)
     long A_dims[2], B_dims[2], C_dims[2];
     long M, N, K;
     double one = 1.0, zero = 0.0;
+    double tmp;
     timeval timer1, timer2;
 
     if (argc < 4) {
@@ -62,11 +63,10 @@ int main(int argc, char **argv)
         dA, K, dB, N, &zero, dC, N);
     cublasGetMatrix(M, N, sizeof(double), dC, N, C, N);
     get_time(&timer2);
-    printf("%ld:%.20lf\n", M, 
-        get_elapsed_ms(timer1, timer2) / 1000.0);
+    tmp = get_elapsed_ms(timer1, timer2);
+    printf("%ld:%.20lf\n", M, tmp / 1000.0);
     fprintf(stderr, "Multiplying %ld-by-%ld matrix by %ld-by-%ld matrix: "
-        "%.20lf s\n", M, K, K, N,
-        get_elapsed_ms(timer1, timer2) / 1000.0);
+        "%.3lf s\n", M, K, K, N, tmp / 1000.0);
 
     if (!quiet)
         write_mat(fC, C, C_dims);

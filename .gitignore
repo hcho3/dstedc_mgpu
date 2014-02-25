@@ -11,3 +11,5 @@ dstedc_c
 *.nvprof
 profile
 dstedc
+prof/dgemm/gpu
+prof/dgemm/cpu

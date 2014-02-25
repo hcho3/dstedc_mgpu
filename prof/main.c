@@ -5,7 +5,7 @@
 #include <lapacke.h>
 #include <cuda_runtime.h>
 
-#define TEST_DSTDC "testmat/dstedc"
+#define TEST_DSTDC "testmat/dlaed1"
 #define TEST_DGEMM "testmat/dgemm"
 
 struct input_ent {
@@ -139,15 +139,15 @@ int main(void)
         exit(1);
     }
     
-    fprintf(cfg_fp, "# Parameters for GPU performance model: dstedc\n"
-                    "# Y = (X1^P1)(X2^P2)(2^P3)\n"
+    fprintf(cfg_fp, "# Parameters for GPU performance model: dlaed1\n"
+                    "# Y = (X1^P0)(X2^P1)(2^P2)\n"
                     "#     where Y  = performance (sec)\n"
                     "#           X1 = subproblem size\n"
                     "#           X2 = # of GPU devices used\n");
     for (i = 0; i < 3; i++)
         fprintf(cfg_fp, "Gparam[%d] = %.20lf\n", i, GY[i]);
-    fprintf(cfg_fp, "# Parameters for CPU performance model: dstedc\n");
-    fprintf(cfg_fp, "# Y = (X1^P1)(X2^P2)(2^P3)\n"
+    fprintf(cfg_fp, "# Parameters for CPU performance model: dlaed1\n");
+    fprintf(cfg_fp, "# Y = (X1^P0)(X2^P1)(2^P2)\n"
                     "#     where Y  = performance (sec)\n"
                     "#           X1 = subproblem size\n"
                     "#           X2 = # of CPU cores used\n");
@@ -262,17 +262,17 @@ int main(void)
     LAPACKE_dgels(LAPACK_COL_MAJOR, 'N', Clen, 2, 1, CX, Clen, CY, Clen);
 
     fprintf(cfg_fp, "# Parameters for GPU performance model: dgemm\n"
-                    "# Y = (X1^P1)(2^P2)\n"
+                    "# Y = (X1^P3)(2^P4)\n"
                     "#     where Y  = performance (sec)\n"
                     "#           X1 = subproblem size\n");
     for (i = 0; i < 2; i++)
-        fprintf(cfg_fp, "Gparam[%d] = %.20lf\n", i, GY[i]);
+        fprintf(cfg_fp, "Gparam[%d] = %.20lf\n", i+3, GY[i]);
     fprintf(cfg_fp, "# Parameters for CPU performance model: dgemm\n");
-    fprintf(cfg_fp, "# Y = (X1^P1)(2^P2)\n"
+    fprintf(cfg_fp, "# Y = (X1^P3)(2^P4)\n"
                     "#     where Y  = performance (sec)\n"
                     "#           X1 = subproblem size\n");
     for (i = 0; i < 2; i++)
-        fprintf(cfg_fp, "Cparam[%d] = %.20lf\n", i, CY[i]);
+        fprintf(cfg_fp, "Cparam[%d] = %.20lf\n", i+3, CY[i]);
 
     printf("GPU performance: Y = (%.5le)*(X1^%.5lf)\n",
            exp2(GY[1]), GY[0]);
