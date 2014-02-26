@@ -13,3 +13,5 @@ profile
 dstedc
 prof/dgemm/gpu
 prof/dgemm/cpu
+dummy*
+dump*

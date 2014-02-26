@@ -1,4 +1,4 @@
-__device__ __forceinline__ double middle_way(long k, long n, double *delta,
+__device__ __forceinline__ double middle_way_gpu(long k, long n, double *delta,
 	double *zeta, double rho, double tau, double orig)
 {
     double DELTA_k, DELTA_k_1;

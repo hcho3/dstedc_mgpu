@@ -4,12 +4,12 @@
 #include <float.h>
 #include "dstedc.h"
 
-#include "initial_guess.cu"
-#include "middle_way.cu"
+#include "initial_guess_gpu.cu"
+#include "middle_way_gpu.cu"
 // CUDA toolchain does not support inlining of a function in different
 // compilation unit.
 
-__global__ void dlaed4(long K, double *D, double *Z, double RHO,
+__global__ void dlaed4_gpu(long K, double *D, double *Z, double RHO,
     double *tau, double *orig)
 // compute the i-th eigenvalue of the perturbed matrix D + rho * z * z**T
 // tau+orig gives the computed eigenvalue.
@@ -24,7 +24,7 @@ __global__ void dlaed4(long K, double *D, double *Z, double RHO,
     RHO = 1.0 / RHO;
     
     // make a good initial guess
-    initial_guess(I, K, D, Z, RHO, &tau[I], &orig[I]);
+    initial_guess_gpu(I, K, D, Z, RHO, &tau[I], &orig[I]);
 
     // iterations begin
     it = 1;
@@ -34,7 +34,7 @@ __global__ void dlaed4(long K, double *D, double *Z, double RHO,
     else
         tol = 16.0 * DBL_EPSILON * fabs(D[K-1]-orig[I]-tau[I]);
     while (it < 100) {
-        eta = middle_way(I, K, D, Z, RHO, tau[I], orig[I]);
+        eta = middle_way_gpu(I, K, D, Z, RHO, tau[I], orig[I]);
         tau[I] += eta;
         if (fabs(eta) <= tol)
             break;

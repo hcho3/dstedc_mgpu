@@ -10,7 +10,7 @@ __global__ static void inv_eig(long K, double *v, double *DLAMDA, double *W,
 __global__ static void eigvec(long K, double *D, double *QHAT, long LDQHAT,
     double *v, double *DLAMDA, double *tau, double *orig);
 
-void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
+void dlaed3_gpu(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
     double *DLAMDA, double *W, double *WORK_dev)
 // stably computes the eigendecomposition Q * diag(lambda) * Q**T  of
 // diag(delta) + RHO * z * z**T  by solving an inverse eigenvalue problem.
@@ -28,7 +28,7 @@ void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
         cudaMemcpyHostToDevice);
     safe_cudaMemcpy(W_dev, W, K * sizeof(double), cudaMemcpyHostToDevice);
 
-    dlaed4<<<(K+TPB-1)/TPB, TPB>>>(K, DLAMDA_dev, W_dev, RHO,
+    dlaed4_gpu<<<(K+TPB-1)/TPB, TPB>>>(K, DLAMDA_dev, W_dev, RHO,
         tau_dev, orig_dev);
     safe_cudaDeviceSynchronize();
 

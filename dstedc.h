@@ -1,19 +1,34 @@
 #undef I
 #define SQ(x)   ((x) * (x))
-void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
-    double *WORK, double **WORK_dev, long *IWORK);
-void dlaed1(long N, double *D, double *Q, long LDQ, long *perm1, double RHO,
-    long CUTPNT, double *WORK, double *WORK_dev, long *IWORK);
+struct cfg_ent {
+    double Gparam[5];
+    double Cparam[5];
+};
+
+void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
+    long LDQ, double *WORK, double **WORK_dev, long *IWORK, cfg_ent cfg);
+void dlaed1_gpu(long N, double *D, double *Q, long LDQ, long *perm1,
+    double RHO, long CUTPNT, double *WORK, double *WORK_dev, long *IWORK);
+void dlaed1_cpu(long NCORE, long N, double *D, double *Q, long LDQ,
+    long *perm1, double RHO, long CUTPNT, double *WORK, long *IWORK);
 void dlaed1_ph2(long NGPU, long N, double *D, double *Q, long LDQ, long *perm1,
     double RHO, long CUTPNT, double *WORK, double **WORK_dev, long *IWORK);
 void dlaed2(long *K, long N, long N1, double *D, double *Q, long LDQ,
     long *perm1, double *RHO, double *Z, double *DWORK, double *QWORK,
     long *perm2, long *permacc, long *perm3); 
-void dlaed3(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
+void dlaed3_gpu(long K, double *D, double *QHAT_dev, long LDQHAT, double RHO,
     double *DLAMDA, double *W, double *WORK_dev);
+void dlaed3_cpu(long NCORE, long K, double *D, double *QHAT, long LDQHAT,
+    double RHO, double *DLAMDA, double *W, double *S);
 void dlaed3_ph2(long K, double *D, double *QHAT, long LDQHAT, double RHO,
     double *DLAMDA, double *W, double *S);
-__global__ void dlaed4(long K, double *D, double *Z, double RHO,
+__global__ void dlaed4_gpu(long K, double *D, double *Z, double RHO,
+    double *tau, double *orig);
+void dlaed4_cpu(long K, long I, double *D, double *Z, double RHO, double *tau,
+    double *orig);
+double middle_way_cpu(long k, long n, double *delta, double *zeta, double rho,
+    double tau, double orig);
+void initial_guess_cpu(long k, long n, double *delta, double *zeta, double rho,
     double *tau, double *orig);
 void dlaed4_ph2(long K, long I, double *D, double *Z, double RHO, double *tau,
     double *orig);
@@ -28,6 +43,12 @@ long *allocate_iwork(long N);
 void free_work(double *WORK);
 void free_work_dev(double **WORK_dev, long NGPU);
 void free_iwork(long *IWORK);
+
+struct cfg_ent load_cfg(const char *filename);
+int compute_dlaed1_partition(const struct cfg_ent cfg, const int NGPU,
+    const int NCPU, const int N, const int subpbs);
+int compute_dgemm_partition(const struct cfg_ent cfg, const int NGPU,
+    const int NCPU, const int N);
 
 double *read_mat(const char *filename, long *dims);
 void write_mat(const char *filename, double *array, long *dims);

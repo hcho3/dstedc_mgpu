@@ -6,8 +6,8 @@
 #include "nvtx.h"
 #include "safety.h"
 
-void dlaed1(long N, double *D, double *Q, long LDQ, long *perm1, double RHO,
-    long CUTPNT, double *WORK, double *WORK_dev, long *IWORK)
+void dlaed1_gpu(long N, double *D, double *Q, long LDQ, long *perm1,
+    double RHO, long CUTPNT, double *WORK, double *WORK_dev, long *IWORK)
 /*
 computes the updated eigensystem of a diagonal matrix after modification by a
 rank-one symmetric matrix.
@@ -52,7 +52,7 @@ rank-one symmetric matrix.
     // sovle secular equation
     if (K > 0) {
         cblas_dcopy(K, D, 1, DWORK, 1);
-        dlaed3(K, D, QHAT_dev, K, RHO, DWORK, Z, WORK_dev);
+        dlaed3_gpu(K, D, QHAT_dev, K, RHO, DWORK, Z, WORK_dev);
 
         // back-transformation
         safe_cublasSetMatrix(N, K, sizeof(double), Q, LDQ, WORK_dev, N);

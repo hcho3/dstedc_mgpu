@@ -10,8 +10,12 @@
 
 #define SMLSIZ 128
 
-void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
-    double *WORK, double **WORK_dev, long *IWORK)
+static void get_bounds(long i, const long *partition, long *submat,
+    long *matsiz, long *msd2);
+static long get_NCORE(int cpu_portion, int NCPUW, int NGPU, int tid);
+
+void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
+    long LDQ, double *WORK, double **WORK_dev, long *IWORK, cfg_ent cfg)
 /* computes all eigenvalues and corresponding eigenvectors of a symmetric
    tridiagonal matrix using the divide-and-conquer eigenvalue algorithm.
    We will have
@@ -20,11 +24,14 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
     RANGE_START("dlaed0_m", 1, 0);
 
     long subpbs; // number of subproblems
-    long i, j, k, submat, smm1, msd2, matsiz;
+    long i, j, k, tid, submat, smm1, msd2, matsiz;
     long pbcap = max_matsiz_gpu(NGPU); // limit on subproblem size
     long pbmax; // largest subproblem seen so far
     long *partition = &IWORK[0];
     long *perm1 = &IWORK[4*N];
+
+    long NCORE; // # of CPU workers assigned to each specific problem
+    long gpu_portion, cpu_portion;
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
@@ -78,7 +85,7 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
     /* Phase 1: Fine-grained, in-core */
     timeval timer1, timer2;
 
-    omp_set_num_threads(NGPU);
+    omp_set_num_threads(NGPU+NCPUW);
     while (subpbs > 1) {
         // update pbmax.
         for (j = 0; j < subpbs/2; j++) {
@@ -90,31 +97,48 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
         if (pbmax > pbcap)
             break;
 
-        get_time(&timer1);
-        #pragma omp parallel for default(none) \
-            private(i, j, k, submat, matsiz, msd2) \
-            firstprivate(N, subpbs, LDQ) \
-            shared(partition, D, Q, perm1, E, WORK, IWORK, WORK_dev)
-        for (j = 0; j < subpbs/2; j++) {
-            i = 2*j - 1;
-            if (i == -1) {
-                submat = 0;
-                matsiz = partition[1];
-                msd2 = partition[0];
-            } else {
-                submat = partition[i];
-                matsiz = partition[i+2] - partition[i];
-                msd2 = matsiz / 2;
-            }
+        gpu_portion =
+            compute_dlaed1_partition(cfg, NGPU, NCPUW, pbmax, subpbs/2);
+        cpu_portion = subpbs/2 - gpu_portion;
+        printf("gpu_portion = %ld, cpu_portion = %ld\n",
+            gpu_portion, cpu_portion);
 
-            // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
-            // into an eigensystem of size matsiz.
-            k = omp_get_thread_num();
-            safe_cudaSetDevice(k);
-            dlaed1(matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
-                &perm1[submat], E[submat+msd2-1], msd2,
-                &WORK[submat*(2*N+2*N*N)/N],
-                WORK_dev[k], &IWORK[subpbs+3*submat]);
+        get_time(&timer1);
+        #pragma omp parallel default(none) \
+            private(i, j, tid, submat, matsiz, msd2, NCORE) \
+            shared(partition, D, Q, perm1, E, WORK, IWORK, WORK_dev) \
+            firstprivate(N, subpbs, LDQ, NGPU, NCPUW, gpu_portion, cpu_portion)
+        {
+            tid = omp_get_thread_num();
+            if (tid < NGPU) { // this thread controls a GPU worker
+                for (j = tid; j < gpu_portion; j += NGPU) {
+                    i = 2*j - 1;
+                    get_bounds(i, partition, &submat, &matsiz, &msd2);
+
+                    // Merge lower order eigensystems (of size msd2 and
+                    // matsiz - msd2) into an eigensystem of size matsiz.
+                    safe_cudaSetDevice(tid);
+                    dlaed1_gpu(matsiz, &D[submat], &Q[submat + submat * LDQ],
+                        LDQ, &perm1[submat], E[submat+msd2-1], msd2,
+                        &WORK[submat*(2*N+2*N*N)/N],
+                        WORK_dev[tid], &IWORK[subpbs+3*submat]);
+                }
+            } else { // this thread is itself a worker
+                for (j = gpu_portion + tid-NGPU; j < subpbs/2; j += NCPUW) {
+                    // determine # of CPU workers to assign to this subproblem
+                    NCORE = get_NCORE(cpu_portion, NCPUW, NGPU, tid);
+
+                    i = 2*j - 1;
+                    get_bounds(i, partition, &submat, &matsiz, &msd2);
+                    
+                    // Merge lower order eigensystems (of size msd2 and
+                    // matsiz - msd2) into an eigensystem of size matsiz.
+                    dlaed1_cpu(NCORE, matsiz, &D[submat],
+                        &Q[submat + submat * LDQ], LDQ, &perm1[submat],
+                        E[submat+msd2-1], msd2, &WORK[submat*(2*N+2*N*N)/N],
+                        &IWORK[subpbs+3*submat]);
+                }
+            }
         }
         get_time(&timer2);
         printf("subproblem size = %ld, cost per subproblem = %.3lf s\n",
@@ -180,4 +204,33 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
     LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, N, &WORK[N], N, Q, LDQ); 
 
     RANGE_END(1);
+}
+
+static void get_bounds(long i, const long *partition, long *submat,
+    long *matsiz, long *msd2)
+{
+    if (i == -1) {
+        *submat = 0;
+        *matsiz = partition[1];
+        *msd2 = partition[0];
+    } else {
+        *submat = partition[i];
+        *matsiz = partition[i+2] - partition[i];
+        *msd2 = *matsiz / 2;
+    }
+}
+
+static long get_NCORE(int cpu_portion, int NCPUW, int NGPU, int tid)
+{
+    int NCORE;
+
+    if (cpu_portion >= NCPUW) {
+        NCORE = 1;
+    } else { // cpu_portion < NCPUW
+        NCORE = NCPUW / cpu_portion;
+        if (tid-NGPU < (NCPUW % cpu_portion))
+            NCORE++;
+    }
+
+    return NCORE;
 }

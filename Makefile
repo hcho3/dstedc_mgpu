@@ -18,9 +18,12 @@ CUDA=-L$(CUDA_PATH) -lcublas -lcudadevrt -lnvToolsExt
 
 TPB=128
 
-_OBJ= dlaed0_m.o dlaed1.o dlaed1_ph2.o dlaed2.o dlaed3.o dlaed3_ph2.o  \
-		dlaed4.o dlaed4_ph2.o dlamrg.o dlapy2.o matio.o main.o workspace.o \
-		safety.o timer.o
+_OBJ= dlaed0_m.o dlaed1_gpu.o dlaed1_cpu.o dlaed1_ph2.o \
+		dlaed2.o dlaed3_gpu.o dlaed3_cpu.o dlaed3_ph2.o  \
+		dlaed4_gpu.o dlaed4_cpu.o dlaed4_ph2.o \
+		initial_guess_cpu.o middle_way_cpu.o \
+		dlamrg.o dlapy2.o matio.o main.o workspace.o \
+		safety.o timer.o cfg.o
 OBJ=$(patsubst %,$(OBJDIR)/%,$(_OBJ))
 
 dstedc: $(OBJ)
