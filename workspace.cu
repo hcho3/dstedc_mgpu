@@ -39,6 +39,24 @@ long max_matsiz_host(void)
     return max_matsiz_host;
 }
 
+long max_num_block(void)
+{
+    int NB, min;
+    int i, NGPU;
+
+    safe_cudaGetDeviceCount(&NGPU);
+
+    safe_cudaDeviceGetAttribute(&min, cudaDevAttrMaxGridDimX, 0);
+
+    for (i = 0; i < NGPU; i++) {
+        safe_cudaDeviceGetAttribute(&NB, cudaDevAttrMaxGridDimX, i);
+        if (NB < min)
+            min = NB;
+    }
+
+    return (long)min;
+}
+
 double *allocate_work(long N)
 {
     double *WORK;
@@ -50,8 +68,14 @@ double *allocate_work(long N)
         exit(1);
     }
 
-    safe_cudaHostAlloc((void **)&WORK,
-        (2*N + 2*N*N) * sizeof(double), cudaHostAllocPortable);
+    //safe_cudaHostAlloc((void **)&WORK,
+    //    (2*N + 2*N*N) * sizeof(double), cudaHostAllocPortable);
+    WORK = (double *)malloc((2*N + 2*N*N) * sizeof(double));
+
+    if (!WORK) {
+        fprintf(stderr, "out of memory\n");
+        exit(1);
+    }
 
     return WORK;
 }
@@ -78,15 +102,22 @@ double **allocate_work_dev(long NGPU, long N)
 long *allocate_iwork(long N)
 {
     long *IWORK;
-    safe_cudaHostAlloc((void **)&IWORK, (5*N) * sizeof(long),
-        cudaHostAllocPortable);
+    //safe_cudaHostAlloc((void **)&IWORK, (5*N) * sizeof(long),
+    //    cudaHostAllocPortable);
+    IWORK = (long *)malloc((5*N) * sizeof(long));
+
+    if (!IWORK) {
+        fprintf(stderr, "out of memory\n");
+        exit(1);
+    }
 
     return IWORK;
 }
 
 void free_work(double *WORK)
 {
-    safe_cudaFreeHost(WORK);
+    //safe_cudaFreeHost(WORK);
+    free(WORK);
 }
 
 void free_work_dev(double **WORK_dev, long NGPU)
@@ -103,5 +134,6 @@ void free_work_dev(double **WORK_dev, long NGPU)
 
 void free_iwork(long *IWORK)
 {
-    safe_cudaFreeHost(IWORK);
+    //safe_cudaFreeHost(IWORK);
+    free(IWORK);
 }

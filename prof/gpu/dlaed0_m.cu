@@ -76,7 +76,6 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
     // eigensystem for the corresponding larger matrix.
     pbmax = 0;
     
-    /* Phase 1: Fine-grained, in-core */
     timeval timer1, timer2;
 
     omp_set_num_threads(NGPU);
@@ -112,7 +111,7 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
             // into an eigensystem of size matsiz.
             k = omp_get_thread_num();
             safe_cudaSetDevice(k);
-            dlaed1(matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
+            dlaed1_gpu(matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
                 &perm1[submat], E[submat+msd2-1], msd2,
                 &WORK[submat*(2*N+2*N*N)/N],
                 WORK_dev[k], &IWORK[subpbs+3*submat]);
@@ -124,43 +123,6 @@ void dlaed0_m(long NGPU, long N, double *D, double *E, double *Q, long LDQ,
         fprintf(stderr,
             "    subproblem size = %ld, cost per subproblem = %.3lf s\n",
             pbmax, tmp);
-
-        // update partition.
-        for (i = -1; i < subpbs - 2; i += 2)
-            partition[(i-1)/2 + 1] = partition[i+2];
-        subpbs /= 2;
-    }
-
-    /* Phase 2: Coarse-grained, out-of-core */
-    while (subpbs > 1) {
-        // update pbmax.
-        for (j = 0; j < subpbs/2; j++) {
-            i = 2*j - 1;
-            matsiz = (i == -1) ? partition[1] : partition[i+2]-partition[i];
-            if (matsiz > pbmax)
-                pbmax = matsiz;
-        }
-
-        get_time(&timer1);
-        for (j = 0; j < subpbs/2; j++) {
-            i = 2*j - 1;
-            if (i == -1) {
-                submat = 0;
-                matsiz = partition[1];
-                msd2 = partition[0];
-            } else {
-                submat = partition[i];
-                matsiz = partition[i+2] - partition[i];
-                msd2 = matsiz / 2;
-            }
-
-            // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
-            // into an eigensystem of size matsiz.
-            dlaed1_ph2(NGPU, matsiz, &D[submat], &Q[submat + submat * LDQ],
-                LDQ, &perm1[submat], E[submat+msd2-1], msd2, WORK, WORK_dev,
-                &IWORK[subpbs]);
-        }
-        get_time(&timer2);
 
         // update partition.
         for (i = -1; i < subpbs - 2; i += 2)

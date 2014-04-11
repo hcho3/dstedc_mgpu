@@ -1,10 +1,12 @@
 all: gpuprof
 
-USE_NVTX=-DUSE_NVTX
-SAFE_CUBLAS=-DSAFE_CUBLAS
-SAFE_CUDA=-DSAFE_CUDA
+include ../../make.inc
 
-DEBUG=-arch=sm_35 -rdc=true -O3 -Xcompiler -Wall -Xcompiler -Wextra \
+#USE_NVTX=-DUSE_NVTX
+#SAFE_CUBLAS=-DSAFE_CUBLAS
+#SAFE_CUDA=-DSAFE_CUDA
+
+DEBUG=-rdc=true -O3 -Xcompiler -Wall -Xcompiler -Wextra \
 	-Xcompiler -fopenmp $(USE_NVTX)
 OBJDIR=obj
 
@@ -15,18 +17,19 @@ LAPACKE=/usr/local/plasma2.5.0/lib/liblapacke.a
 ATLAS=-L$(ATLAS_PATH) -llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm
 CUDA=-L$(CUDA_PATH) -lcublas -lcudadevrt -lnvToolsExt
 
-TPB=128
+NV_SM= -arch=sm_35 -gencode arch=compute_35,code=sm_35 \
+	   -gencode arch=compute_35,code=compute_35
 
-_OBJ= dlaed0_m.o dlaed1.o dlaed1_ph2.o dlaed2.o dlaed3.o dlaed3_ph2.o  \
-		dlaed4.o dlaed4_ph2.o dlamrg.o dlapy2.o matio.o main.o workspace.o \
-		safety.o timer.o
+_OBJ= dlaed0_m.o dlaed1.o dlaed2.o dlaed3.o \
+		dlaed4.o dlamrg.o dlapy2.o matio.o main.o workspace.o \
+		safety.o timer.o nvtx.o
 OBJ=$(patsubst %,$(OBJDIR)/%,$(_OBJ))
 
 gpuprof: $(OBJ)
-	nvcc $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) $(CUDA)
+	nvcc $(NV_SM) $(DEBUG) -o $@ $^ $(LAPACKE) $(ATLAS) $(CUDA)
 
 $(OBJDIR)/%.o: %.cu
-	nvcc $(DEBUG) -c $< -o $@ $(SAFE_CUDA) $(SAFE_CUBLAS) -DTPB=$(TPB)
+	nvcc $(NV_SM) $(DEBUG) -c $< -o $@ $(SAFE_CUDA) $(SAFE_CUBLAS) -DTPB=$(TPB)
 $(OBJDIR)/matio.o: ../../matio/matio.c
 	g++ -O3 -Wall -Wextra -c $< -o $@
 

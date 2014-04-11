@@ -4,6 +4,7 @@
 #include <lapacke.h>
 #include <omp.h>
 #include "dstedc.h"
+#include "nvtx.h"
 
 void dlaed1_cpu(long NCORE, long N, double *D, double *Q, long LDQ,
     long *perm1, double RHO, long CUTPNT, double *WORK, long *IWORK)
@@ -16,6 +17,8 @@ rank-one symmetric matrix.
     and cutpnt + 1 th elements and zeros elsewhere. 
 */
 {
+    RANGE_START("dlaed1_cpu", 1, 1);
+
     long i, j, k;
     long blki, blkj, blkk;
     long pardim = NCORE;
@@ -68,7 +71,8 @@ rank-one symmetric matrix.
             parK[i] = parK[i-1] + K/pardim;
 
         // out-of-core matrix multiplication
-        omp_set_num_threads(NCORE);
+        omp_set_num_threads((int)NCORE);
+        RANGE_START("dgemm_cpu", 2, 6);
         for (j = 0; j < pardim; j++) {
             #pragma omp parallel for default(none) \
                 private(i, k, blki, blkj, blkk) \
@@ -91,6 +95,7 @@ rank-one symmetric matrix.
             }
         }
         LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, K, QWORK, N, Q, LDQ);
+        RANGE_END(2);
 
         // compute perm1 that would merge back deflated values.
         dlamrg(K, N-K, D, 1, -1, perm1);
@@ -101,4 +106,6 @@ rank-one symmetric matrix.
 
     free(parK);
     free(parN);
+
+    RANGE_END(1);
 }

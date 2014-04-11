@@ -67,10 +67,16 @@ int main(int argc, char **argv)
 
     Q_dims[0] = Q_dims[1] = N;
     Q = (double *)malloc(N * N * sizeof(double));
+    if (!Q) {
+        fprintf(stderr, "insufficient memory\n");
+        exit(1);
+    }
 
     WORK = allocate_work(N);
     WORK_dev = allocate_work_dev(NGPU, N);
     IWORK = allocate_iwork(N);
+    
+    printf("initialization complete.\n");
 
     get_time(&timer1);
     dlaed0_m(NGPU, NCPUW, N, D, E, Q, N, WORK, WORK_dev, IWORK, cfg);

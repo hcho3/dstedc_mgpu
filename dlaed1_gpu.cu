@@ -17,7 +17,7 @@ rank-one symmetric matrix.
     and cutpnt + 1 th elements and zeros elsewhere. 
 */
 {
-    RANGE_START("dlaed1", 1, 1);
+    RANGE_START("dlaed1_gpu", 1, 1);
 
     long i;
     long K;
@@ -54,12 +54,14 @@ rank-one symmetric matrix.
         cblas_dcopy(K, D, 1, DWORK, 1);
         dlaed3_gpu(K, D, QHAT_dev, K, RHO, DWORK, Z, WORK_dev);
 
+        RANGE_START("dgemm_gpu", 2, 6);
         // back-transformation
         safe_cublasSetMatrix(N, K, sizeof(double), Q, LDQ, WORK_dev, N);
         safe_cublasDgemm(cb_handle, CUBLAS_OP_N, CUBLAS_OP_N, N, K, K,
             &dgemm_param[0], WORK_dev, N, QHAT_dev, K, &dgemm_param[1],
-            Q_dev, LDQ);
-        safe_cublasGetMatrix(N, K, sizeof(double), Q_dev, LDQ, Q, LDQ);
+            Q_dev, N);
+        safe_cublasGetMatrix(N, K, sizeof(double), Q_dev, N, Q, LDQ);
+        RANGE_END(2);
 
         // compute perm1 that would merge back deflated values.
         dlamrg(K, N-K, D, 1, -1, perm1);

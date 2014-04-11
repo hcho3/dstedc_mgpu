@@ -3,17 +3,17 @@
 #include <cublas_v2.h>
 #include "safety.h"
 
-void _cuda_check(cudaError_t cs, long line)
+void _cuda_check(cudaError_t cs, const char *file, long line)
 {
     const char *errstr;
 
     if (cs != cudaSuccess) {
         errstr = cudaGetErrorString(cs);
-        printf("CUDA error %s at %ld.\n", errstr, line);
+        printf("CUDA error %s at %s:%ld.\n", errstr, file, line);
         exit(1);
     }
 }
-void _cublas_check(int cs, long line)
+void _cublas_check(int cs, const char *file, long line)
 {
     const char *errstr;
 
@@ -38,7 +38,7 @@ void _cublas_check(int cs, long line)
             default:
                 errstr = "unknown";
         }
-        printf("CUBLAS error %s at %ld.\n", errstr, line);
+        printf("CUBLAS error %s at %s:%ld.\n", errstr, file, line);
         exit(1);
     }
 }

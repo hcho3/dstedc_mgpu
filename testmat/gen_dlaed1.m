@@ -15,7 +15,7 @@ if length(dir('dlaed1')) > 2
         return;
     end
 end
-for matsiz=[1024 2048 4096 8192 16384]
+for matsiz=[1024 2048 4096 8192 16384 32768 50000]
     matsiz
     v = randn(matsiz, 1);
     v = v(:);

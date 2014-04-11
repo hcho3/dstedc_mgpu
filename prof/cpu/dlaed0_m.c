@@ -105,9 +105,10 @@ void dlaed0_m(long NGRP, long NCORE, long N, double *D, double *E, double *Q,
             // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
             // into an eigensystem of size matsiz.
             NCOREP = NCORE / ((subpbs/2 >= NGRP) ? NGRP : (subpbs/2));
-            dlaed1(NCOREP, matsiz, &D[submat], &Q[submat + submat * LDQ], LDQ,
-                &perm1[submat], E[submat+msd2-1], msd2,
-                &WORK[submat*(2*N+2*N*N)/N], &IWORK[subpbs+3*submat]);
+            dlaed1_cpu(NCOREP, matsiz, &D[submat],
+                &Q[submat + submat * LDQ], LDQ, &perm1[submat],
+                E[submat+msd2-1], msd2, &WORK[submat*(2*N+2*N*N)/N],
+                &IWORK[subpbs+3*submat]);
         }
         get_time(&timer2);
         tmp = get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs;

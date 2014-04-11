@@ -30,10 +30,11 @@ cfg_ent load_cfg(const char *filename)
 {
     FILE *cfg = fopen(filename, "r");
     cfg_ent c;
-    int Gvalid[5] = {0}, Cvalid[5] = {0};
+    int Gvalid[6] = {0}, Cvalid[6] = {0};
 
     if (!cfg) {
-        printf("Error: params.cfg does not exist.\n");
+        printf("Error: params.cfg has not been generated.\n");
+        printf("Please run ./profile.\n");
         perror("fopen");
         exit(1);
     }
@@ -56,11 +57,15 @@ cfg_ent load_cfg(const char *filename)
     if (!Gvalid[3]) invalid("Gparam[3] was not found.\n");
     Gvalid[4] = try_read(cfg, "Gparam[4] = %lf", &c.Gparam[4]);
     if (!Gvalid[4]) invalid("Gparam[4] was not found.\n");
+    Gvalid[5] = try_read(cfg, "Gparam[5] = %lf", &c.Gparam[5]);
+    if (!Gvalid[5]) invalid("Gparam[5] was not found.\n");
 
     Cvalid[3] = try_read(cfg, "Cparam[3] = %lf", &c.Cparam[3]);
     if (!Cvalid[3]) invalid("Cparam[3] was not found.\n");
     Cvalid[4] = try_read(cfg, "Cparam[4] = %lf", &c.Cparam[4]);
     if (!Cvalid[4]) invalid("Cparam[4] was not found.\n");
+    Cvalid[5] = try_read(cfg, "Cparam[5] = %lf", &c.Cparam[5]);
+    if (!Cvalid[5]) invalid("Cparam[5] was not found.\n");
 
     fclose(cfg);
 
@@ -92,37 +97,20 @@ int compute_dlaed1_partition(const cfg_ent cfg, const int NGPU,
     return gpu_portion;
 }
 
-static double f(double x, double G1, double G2, double C1, double C2, double N,
-         double K) // K = # of CPUs / # of GPUs
+int compute_dlaed4_partition(const cfg_ent cfg, const int NGPU,
+    const int NCPU, const int K)
 {
-    return G1*log(x) - C1*log(N-x) + log(K) + (G2-C2)*log(2);
-}
+    double c, g;
+    double ratio;
+    int gpu_portion;
 
-int compute_dgemm_partition(const cfg_ent cfg, const int NGPU,
-    const int NCPU, const int N)
-{
-    // bisection method
-    double a, b, c, fa, fb, fc;
-    const double *G = cfg.Gparam;
-    const double *C = cfg.Cparam;
+    c = pow((double)K, cfg.Cparam[0]) * pow((double)NCPU, cfg.Cparam[1])
+           * exp2(cfg.Cparam[2]);
+    g = pow((double)K, cfg.Gparam[0]) * pow((double)NGPU, cfg.Gparam[1])
+           * exp2(cfg.Gparam[2]);
 
-    a = 0;
-    b = N;
-    fa = f(a, G[3], G[4], C[3], C[4], N, (double)NCPU/NGPU);
-    fb = f(b, G[3], G[4], C[3], C[4], N, (double)NCPU/NGPU);
+    ratio = c / g;
+    gpu_portion = (int)ceil(K*ratio/(ratio+1));
 
-    while (b-a > 1e-5) {
-        c = (a+b)/2.0;
-        fc = f(c, G[3], G[4], C[3], C[4], N, (double)NCPU/NGPU);
-        if ( (fc < 0 && fa > 0) || (fc > 0 && fa < 0) ) {
-            // a and c make the new interval
-            b = c;
-            fb = fc;
-        } else {
-            // c and b make the new interval
-            a = c;
-            fa = fc;
-        }
-    }
-    return (int)round((a+b)/2.0); 
+    return gpu_portion;
 }

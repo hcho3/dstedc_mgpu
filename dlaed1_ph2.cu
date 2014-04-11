@@ -7,9 +7,11 @@
 #include "dstedc.h"
 #include "nvtx.h"
 #include "safety.h"
+#include "timer.h"
 
-void dlaed1_ph2(long NGPU, long N, double *D, double *Q, long LDQ, long *perm1,
-    double RHO, long CUTPNT, double *WORK, double **WORK_dev, long *IWORK)
+void dlaed1_ph2(long NGPU, long NCPUW, long N, double *D, double *Q, long LDQ,
+    long *perm1, double RHO, long CUTPNT, double *WORK, double **WORK_dev,
+    long *IWORK, cfg_ent cfg)
 /*
 computes the updated eigensystem of a diagonal matrix after modification by a
 rank-one symmetric matrix.
@@ -47,6 +49,10 @@ rank-one symmetric matrix.
     long *permacc   = &IWORK[N];
     long *perm3     = &IWORK[2 * N];
 
+#ifdef USE_TIMER
+    timeval timer1, timer2;
+#endif
+
     // set up workspace aliases and temporary arrays
     QHAT_dev = (double **)malloc(NGPU * sizeof(double *));
     Q_dev = (double **)malloc(NGPU * sizeof(double *));
@@ -73,7 +79,8 @@ rank-one symmetric matrix.
     // sovle secular equation
     if (K > 0) {
         cblas_dcopy(K, D, 1, DWORK, 1);
-        dlaed3_ph2(K, D, QHAT, K, RHO, DWORK, Z, QWORK);
+        dlaed3_ph2(NGPU, NCPUW, K, D, QHAT, K, RHO, DWORK, Z, WORK_dev,
+            QWORK, cfg);
 
         // back-transformation
         for (i = 0; i < NGPU; i++) {
@@ -92,7 +99,11 @@ rank-one symmetric matrix.
             parK[i] = parK[i-1] + K/pardim;
 
         // out-of-core matrix multiplication
-        omp_set_num_threads(NGPU);
+        omp_set_num_threads((int)NGPU);
+        RANGE_START("dgemm_ph2", 2, 6);
+#ifdef USE_TIMER
+        get_time(&timer1);
+#endif
         for (j = 0; j < pardim; j++) {
             #pragma omp parallel for default(none) \
                 private(i, k, id, blki, blkj, blkk) \
@@ -129,6 +140,11 @@ rank-one symmetric matrix.
             }
         }
         LAPACKE_dlacpy(LAPACK_COL_MAJOR, 'A', N, K, QWORK, N, Q, LDQ);
+#ifdef USE_TIMER
+        get_time(&timer2);
+        printf("gemms =  %6.2lf s\n", get_elapsed_ms(timer1, timer2) / 1000.0);
+#endif
+        RANGE_END(2);
 
         // compute perm1 that would merge back deflated values.
         dlamrg(K, N-K, D, 1, -1, perm1);

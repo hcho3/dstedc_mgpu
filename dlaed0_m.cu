@@ -31,7 +31,11 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
     long *perm1 = &IWORK[4*N];
 
     long NCORE; // # of CPU workers assigned to each specific problem
-    long gpu_portion, cpu_portion;
+    long gpu_portion, cpu_portion, curlvl;
+
+#ifdef USE_TIMER
+    timeval timer1, timer2;
+#endif
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
@@ -60,6 +64,9 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
     // Solve each submatrix eigenvalue problem at the bottom of the divide and
     // conquer tree.
     omp_set_num_threads(omp_get_num_procs());
+#ifdef USE_TIMER
+    get_time(&timer1);
+#endif
     #pragma omp parallel for default(none) \
         private(i, j, k, submat, matsiz) firstprivate(subpbs, LDQ) \
         shared(partition, D, E, Q, WORK, perm1)
@@ -77,15 +84,18 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
         for (j = submat; j < partition[i+1]; j++)
             perm1[j] = k++;
     }
+#ifdef USE_TIMER
+    get_time(&timer2);
+    printf("  for: dsteqr = %6.2lf\n", get_elapsed_ms(timer1, timer2) / 1000.0);
+#endif
 
     // Successively merge eigensystems of adjacent submatrices into
     // eigensystem for the corresponding larger matrix.
     pbmax = 0;
     
     /* Phase 1: Fine-grained, in-core */
-    timeval timer1, timer2;
-
-    omp_set_num_threads(NGPU+NCPUW);
+    omp_set_num_threads((int)(NGPU+NCPUW));
+    curlvl = 1;
     while (subpbs > 1) {
         // update pbmax.
         for (j = 0; j < subpbs/2; j++) {
@@ -100,10 +110,13 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
         gpu_portion =
             compute_dlaed1_partition(cfg, NGPU, NCPUW, pbmax, subpbs/2);
         cpu_portion = subpbs/2 - gpu_portion;
-        printf("gpu_portion = %ld, cpu_portion = %ld\n",
-            gpu_portion, cpu_portion);
+        //printf("gpu_portion = %ld, cpu_portion = %ld\n",
+        //    gpu_portion, cpu_portion);
 
+        RANGE_START("level", 2, 5);
+#ifdef USE_TIMER
         get_time(&timer1);
+#endif
         #pragma omp parallel default(none) \
             private(i, j, tid, submat, matsiz, msd2, NCORE) \
             shared(partition, D, Q, perm1, E, WORK, IWORK, WORK_dev) \
@@ -140,14 +153,18 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
                 }
             }
         }
-        get_time(&timer2);
-        printf("subproblem size = %ld, cost per subproblem = %.3lf s\n",
-            pbmax, get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs);
-
         // update partition.
         for (i = -1; i < subpbs - 2; i += 2)
             partition[(i-1)/2 + 1] = partition[i+2];
         subpbs /= 2;
+        ++curlvl;
+
+#ifdef USE_TIMER
+        get_time(&timer2);
+        printf("%ld: time:  %6.2lf\n\n",
+            curlvl, get_elapsed_ms(timer1, timer2) / 1000.0);
+#endif
+        RANGE_END(2);
     }
 
     /* Phase 2: Coarse-grained, out-of-core */
@@ -160,7 +177,10 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
                 pbmax = matsiz;
         }
 
+        RANGE_START("level", 3, 5);
+#ifdef USE_TIMER
         get_time(&timer1);
+#endif
         for (j = 0; j < subpbs/2; j++) {
             i = 2*j - 1;
             if (i == -1) {
@@ -175,18 +195,22 @@ void dlaed0_m(long NGPU, long NCPUW, long N, double *D, double *E, double *Q,
 
             // Merge lower order eigensystems (of size msd2 and matsiz - msd2)
             // into an eigensystem of size matsiz.
-            dlaed1_ph2(NGPU, matsiz, &D[submat], &Q[submat + submat * LDQ],
-                LDQ, &perm1[submat], E[submat+msd2-1], msd2, WORK, WORK_dev,
-                &IWORK[subpbs]);
+            dlaed1_ph2(NGPU, NCPUW, matsiz, &D[submat],
+                &Q[submat + submat * LDQ], LDQ, &perm1[submat],
+                E[submat+msd2-1], msd2, WORK, WORK_dev, &IWORK[subpbs], cfg);
         }
-        get_time(&timer2);
-        printf("subproblem size = %ld, cost per subproblem = %.3lf s\n",
-            pbmax, get_elapsed_ms(timer1, timer2) / 1000.0 / subpbs);
-
         // update partition.
         for (i = -1; i < subpbs - 2; i += 2)
             partition[(i-1)/2 + 1] = partition[i+2];
         subpbs /= 2;
+        ++curlvl;
+
+#ifdef USE_TIMER
+        get_time(&timer2);
+        printf("%ld: time: %6.2lf s\n",
+            curlvl, get_elapsed_ms(timer1, timer2) / 1000.0);
+#endif
+        RANGE_END(3);
     }
     
     // Re-merge the eigenvalues and eigenvectors which were deflated at the

@@ -1,9 +1,8 @@
 #ifdef USE_NVTX
 #include "nvToolsExt.h"
 
-const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff,
-                            0x0000ffff, 0x00ff0000, 0x00ffffff };
-const int num_colors = sizeof(colors)/sizeof(uint32_t);
+extern const uint32_t colors[];
+extern const int num_colors;
 
 #define VARGEN( prefix, id ) prefix##id
 
@@ -20,6 +19,7 @@ const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #define RANGE_END( id ) \
     nvtxRangeEnd(VARGEN(range, id))
 #else
+extern const int colors[];
 #define RANGE_START( name, id, cid )
 #define RANGE_END( id )
 #endif

@@ -1,5 +1,5 @@
-all: ../profile gpuprof cpuprof dgemm
-.PHONY: gpuprof cpuprof dgemm
+all: ../profile gpuprof cpuprof
+.PHONY: gpuprof cpuprof
 
 DEBUG=-O3 -Xcompiler -Wall -Xcompiler -Wextra
 LAPACKE=/usr/local/plasma2.5.0/lib/liblapacke.a
@@ -15,11 +15,8 @@ gpuprof:
 cpuprof:
 	$(MAKE) -C cpu/
 
-dgemm:
-	$(MAKE) -C dgemm/
-
 clean:
 	$(MAKE) -C gpu/ clean
 	$(MAKE) -C cpu/ clean
-	$(MAKE) -C dgemm/ clean
+	$(MAKE) -C dlaed4/ clean
 	rm -fv ../profile
