@@ -1,0 +1,83 @@
+Memory-efficient divide-and-conquer with automatic profiling
+
+SYNOPSIS
+    Divide-and-conquer algorithm is a numerically stable and efficient algorithm
+    that computes the eigenvalues and eigenvectors of a symmetric tridiagonal
+    matrix. We often face the situation where the input matrix fits into the
+    main memory but not into the on-chip memory of a GPU device. We present an
+    out-of-core implementation where only part of the input matrix is resident
+    in GPU memory at any point in time. Work is dynamically allocated to
+    multiple GPUs and CPU cores, taking account of available workspaces and
+    progress of the algorithm. Our implementation is capable of handling any
+    size of input, provided that it fits into the main memory. In addition, it
+    delivers a performance comparable to that of conventional multi-GPU
+    implementations for cases where workspaces fit into the GPU memory.
+
+DOCUMENTATION
+    See http://www.hyunsu-cho.org/dstedc.html.
+
+DEPENDENCIES
+    1. ATLAS (Automatically Tuned Linear Algebra Software)
+       http://math-atlas.sourceforge.net/
+
+    2. CUDA extention library (included in CUDA toolkit)
+    
+    3. gcc with OpenMP support
+
+HOW TO COMPILE
+    1. Open make.inc and edit the system paths (lines 2-4) as necessary.
+       Also revise the compilation options (lines 7-8); if your NVIDIA GPU is
+       Fermi or older, use sm_25 or lower. Adjust the flags (lines 14-16) if
+       you'd like.
+
+    2. Run make. It will build all the components.
+
+HOW TO RUN
+    A crucial component of this package is automatic profiling of the current
+    machine configuration. The main program depends on the performance
+    parameters that are automatically detected by the profiling component. Make
+    sure to run the profiler first to obtain the needed parameters.
+
+    1. (First time) Run ./profile. This may take some time. Performance
+       parameters are saved to params.cfg. This step is needed only for the
+       first time use.
+
+    2. Run the main program ./dstedc. Command examples are found in tester.sh.
+
+    3. Both inputs and outputs are stored as *.bin files. To read and write
+       *.bin matrices from MATLAB, add matio/ to the working path and use
+       read_bin() and write_bin().
+
+       Example (MATLAB):
+           addpath('./matio');
+           D = read_bin('testmat/dlaed1/D_32768.bin');
+           E = read_bin('testmat/dlaed1/E_32768.bin');
+           A = diag(D) + diag(E,1) + diag(E,-1);
+           write_bin('A.bin', A);
+
+
+BINARY MATRIX FILE FORMAT
+    The *.bin file format follows a very simplistic layout:
+
+    * First 8 bytes: number of rows in the matrix
+    * Next 8 bytes: number of columns in the matrix
+    * All the following bytes: all entries of the matrix laid out in
+      column-major format.
+
+    The current implementation does not consider endian compatibility. All the
+    *.bin files included in the package were generated in a little-endian
+    machine and thus are incompatible with big-endian machines.
+
+
+FUNCTION SUMMARY
+    The organization follows that of LAPACK. We direct the reader to
+    http://www.netlib.org/lapack/lawnspdf/lawn69.pdf for more information.
+    - dlaed0: the entry point of the divide-and-conquer eigensolver
+    - dlaed1: Call dlaed2 and dlaed3 so as to merge the eigen-decompositions of 
+              two adjacent submatrices. Also back-transform the eigenvectors
+              returned by dlaed3.
+    - dlaed2: Perform deflation.
+    - dlaed3: Call dlaed4 and then solve an inverse eigenvalue problem to obtain
+              a set of eigenvectors.
+    - dlaed4: Compute each eigenvalue in the merged eigendecomposition by
+              solving the secular equation.

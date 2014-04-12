@@ -1,11 +1,10 @@
 all: cpuprof
 
+include ../../make.inc
+
 DEBUG=-O3 -Wall -Wextra -pedantic -fopenmp -std=gnu99
 OBJDIR=obj
 
-ATLAS_PATH=/usr/local/atlas3.10.1/lib/
-
-LAPACKE=/usr/local/plasma2.5.0/lib/liblapacke.a
 ATLAS=-L$(ATLAS_PATH) -llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm
 
 _OBJ= dlaed0_m.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o  \

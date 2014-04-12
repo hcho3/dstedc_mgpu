@@ -1,9 +1,9 @@
 all: ../profile gpuprof cpuprof
 .PHONY: gpuprof cpuprof
 
+include ../make.inc
+
 DEBUG=-O3 -Xcompiler -Wall -Xcompiler -Wextra
-LAPACKE=/usr/local/plasma2.5.0/lib/liblapacke.a
-ATLAS_PATH=/usr/local/atlas3.10.1/lib/
 ATLAS=-L$(ATLAS_PATH) -llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm
 
 ../profile: main.c

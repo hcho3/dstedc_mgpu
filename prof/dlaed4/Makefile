@@ -6,15 +6,8 @@ DEBUG=-rdc=true -O3 -Xcompiler -Wall -Xcompiler -Wextra \
 	-Xcompiler -fopenmp $(USE_NVTX)
 OBJDIR=obj
 
-ATLAS_PATH=/usr/local/atlas3.10.1/lib/
-CUDA_PATH=/usr/local/cuda/lib64
-
-LAPACKE=/usr/local/plasma2.5.0/lib/liblapacke.a
 ATLAS=-L$(ATLAS_PATH) -llapack -lcblas -lf77blas -latlas -lgfortran -lz -lm
 CUDA=-L$(CUDA_PATH) -lcublas -lcudadevrt -lnvToolsExt
-
-NV_SM= -gencode arch=compute_30,code=sm_35 \
-	   -gencode arch=compute_30,code=compute_30
 
 _OBJ= matio.o safety.o timer.o workspace.o
 _OBJ_GPU= dlaed4_gpu.o main_gpu.o
