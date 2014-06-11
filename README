@@ -1,17 +1,18 @@
 Memory-efficient divide-and-conquer with automatic profiling
 
 SYNOPSIS
-    Divide-and-conquer algorithm is a numerically stable and efficient algorithm
-    that computes the eigenvalues and eigenvectors of a symmetric tridiagonal
-    matrix. We often face the situation where the input matrix fits into the
-    main memory but not into the on-chip memory of a GPU device. We present an
-    out-of-core implementation where only part of the input matrix is resident
-    in GPU memory at any point in time. Work is dynamically allocated to
-    multiple GPUs and CPU cores, taking account of available workspaces and
-    progress of the algorithm. Our implementation is capable of handling any
-    size of input, provided that it fits into the main memory. In addition, it
-    delivers a performance comparable to that of conventional multi-GPU
-    implementations for cases where workspaces fit into the GPU memory.
+    Divide-and-conquer algorithm is a numerically stable and efficient
+    algorithm that computes the eigenvalues and eigenvectors of a symmetric
+    tridiagonal matrix. We often face the situation where the input matrix fits
+    into the main memory but not into the on-chip memory of a GPU device. We
+    present an out-of-core implementation where only part of the input matrix
+    is resident in GPU memory at any point in time. It works independently of
+    the physical size of GPU memory, handling any size of input as long as it
+    fits into the main memory. Work is dynamically allocated to multiple GPUs
+    and CPU cores, taking account of available workspaces and progress of the
+    algorithm. In addition, it delivers a performance comparable to that of
+    conventional multi-GPU implementations for cases where workspaces fit into
+    the GPU memory.
 
 DOCUMENTATION
     See http://www.hyunsu-cho.org/dstedc.html.
